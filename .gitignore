@@ -1,0 +1,39 @@
+# Python Notebook
+.ipynb_checkpoints/
+venv/
+.venv/
+__pycache__/
+*.pyc
+*.pyo
+logs/
+*.log
+.DS_Store
+.vscode/
+.idea/
+*.out
+
+# Data (Optional)
+*.csv
+*.tsv
+*.h5
+*.parquet
+*.db
+
+# LaTeX
+*.aux
+*.bbl
+*.blg
+*.log
+*.lof
+*.lot
+*.toc
+*.nav
+*.snm
+*.synctex.gz
+*.out
+*.fls
+*.fdb_latexmk
+*.pdf
+*.dvi
+*.ps
+*.synctex
