@@ -1,7 +1,9 @@
-import torch, sys, os
+import sys, os
 import numpy as np
-sys.path.insert(0, './utils')
-sys.path.insert(0, './models')
+sys.path.insert(0, './Code/Deepfit/utils')
+sys.path.insert(0, './Code/Deepfit/models')
+sys.path.insert(0, './Code/Deepfit/tutorial')
+
 # sys.path.insert(0, '../trained_models')
 import DeepFit
 import tutorial_utils as tu
@@ -10,10 +12,12 @@ from tqdm import tqdm
 
 # import ipyvolume as ipv
 # import ipywidgets as widgets
+
 # from IPython.display import display
 # import functools
 # import glob
 # import open3d as o3d
+
 
 jet_order_fit = 3
 gpu_idx = 0
@@ -25,6 +29,7 @@ def testGPU():
     ngpu= 1
     localdevice = torch.device("cuda:0" if (torch.cuda.is_available() and ngpu > 0) else "cpu")
     print (localdevice)
+
 
 
 def run ():
