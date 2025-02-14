@@ -211,6 +211,6 @@ if __name__ == '__main__':
         print (f'{len(main_skip_list)}/{len(sampledIndices)} are skipped')
         remainIndices = list(set(sampledIndices).difference(set(main_skip_list)))
         
-        tmp = f'{filename}_quality_score_ours3.txt'
+        tmp = f'{filename}_quality_score_ours4.txt'
         np.savetxt(tmp, np.concatenate([rawPoints[remainIndices], arrResList], axis = 1) , fmt='%1.6f')
         print (f'quality score file save to {tmp}')
