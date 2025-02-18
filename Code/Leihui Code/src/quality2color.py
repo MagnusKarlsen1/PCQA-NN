@@ -11,3 +11,4 @@ quality_score = 1/res[:,3]
 pc_colors = np.concatenate([res[:,0:3], quality_score.reshape(-1, 1)], axis = 1)
 saveFilename = f'./data/bunny_quality_score_colored.txt'
 np.savetxt(saveFilename, pc_colors, fmt='%1.6f')
+
