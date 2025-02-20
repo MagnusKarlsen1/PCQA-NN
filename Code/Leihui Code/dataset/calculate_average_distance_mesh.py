@@ -8,7 +8,7 @@ if __name__ == "__main__":
         #     './practical_scanning/Filename',
         #     './scanning_repository/Filename',
         #     './synethsis/Filename',
-        "./SelfGeneratedClouds/step_drill_bit"
+        "./SelfGeneratedClouds/bevel_gear"
     ]
 
     def calculateDistanceTwoPoints(p1, p2):
