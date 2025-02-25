@@ -181,7 +181,7 @@ if __name__ == '__main__':
         print (f'rawPoints data format: {rawPoints.shape}')
         print (f'normals data format: {normals.shape}')
         print (f'betas data format: {betas.shape}')
-
+        
         unitPoints = preprocess(rawPoints)
         
         kdtree = cKDTree(unitPoints, leafsize = 10, balanced_tree = False)

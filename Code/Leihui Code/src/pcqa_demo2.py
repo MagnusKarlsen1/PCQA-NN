@@ -45,13 +45,13 @@ def local_pcqa(total_thread:int, thread_index:int, sampledIndices):
         for indice, i in enumerate(tqdm(_sampledIndices)):
             # 1. Searching neighbor points
             stepName[1] = 'Searching neighbor points'
-            timeStart = time.time()
+            # timeStart = time.time()
             partPoints, _, rad = processPart (kdtree, i, unitPoints, searchPointSize)
             partPoints = partPoints.numpy().T
             alpha, _ = averageDisPoints(partPoints, searchK = 2)
             # np.savetxt('./tmpBug.xyz', partPoints, fmt='%1.6f')
-            timeSeg1 = time.time() - timeStart
-            timeStart = time.time()
+            # timeSeg1 = time.time() - timeStart
+            # timeStart = time.time()
             
             # 2. Obtain Fitting Results
             stepName[2] = 'Obtain Fitting Results'
