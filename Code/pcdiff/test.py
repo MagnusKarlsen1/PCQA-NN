@@ -6,6 +6,8 @@ pos = data[:, 0:3]
 # Random point cloud
 #pos = np.random.rand(1000, 3)
 
+Cloud_size = np.size(pos,0)
+
 # Generate kNN graph
 edge_index = knn_graph(pos, 20)
 # Estimate normals and local frames
@@ -17,7 +19,7 @@ grad, div = build_grad_div(pos, *basis, edge_index)
 laplacian = -(div @ grad)
 
 # Define some function on the point cloud
-x = np.random.rand(np.size(pos,0), 1)
+x = np.random.rand(Cloud_size, 1)
 
 # Compute gradient of function
 # The output is of size 2N, with the two components of the vector field interleaved:
@@ -25,4 +27,4 @@ x = np.random.rand(np.size(pos,0), 1)
 grad_x = grad @ x
 
 print('Gradients:\n', grad_x,
-      '\n\n Number of points: ', np.size(grad_x,0))
+      '\n\n Number of points: ', Cloud_size)
