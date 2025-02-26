@@ -9,7 +9,7 @@ pos = data[:, 0:3]
 Cloud_size = np.size(pos,0)
 
 # Generate kNN graph
-edge_index = knn_graph(pos, 20)
+edge_index = knn_graph(pos, 10)
 # Estimate normals and local frames
 basis = estimate_basis(pos, edge_index)
 # Build gradient and divergence operators (Scipy sparse matrices)
@@ -26,5 +26,5 @@ x = np.random.rand(Cloud_size, 1)
 # [x_1, y_1, x_2, y_2, ..., x_N, y_N]
 grad_x = grad @ x
 
-print('Gradients:\n', grad_x,
+print('Gradients:\n', np.sum(grad.row==51),
       '\n\n Number of points: ', Cloud_size)
