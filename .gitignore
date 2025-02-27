@@ -18,6 +18,8 @@ logs/
 *.h5
 *.parquet
 *.db
+*.txt
+
 
 # LaTeX
 *.aux
