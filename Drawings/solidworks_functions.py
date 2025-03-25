@@ -85,8 +85,8 @@ def Create_geometry(shape: str, output_path: str, params: dict):
     rebuild_model(model)
     save_as_stl(model, output_path)
     
-    
-    return print(f"Geometry created and saved to {output_path}")
+    print(f"Geometry created and saved to {output_path}")
+    return model
     
 def delete_stl(path):
     if os.path.exists(path):
@@ -96,4 +96,23 @@ def delete_stl(path):
 
 
 
+def get_surface_area(model, unit = "mm2"):
+    """
+    Uses GetMassProperties2 to get surface area from the full model.
+    Finds the Surface area and gives it in mm
+    """
 
+    mass_props = model.Extension.GetMassProperties2(1, VARIANT(pythoncom.VT_BYREF | pythoncom.VT_I4, 0), False)
+
+    if not mass_props:
+        raise RuntimeError("❌ GetMassProperties2 failed.")
+
+    if unit == "mm2":
+        
+        print(f"Surface Area: {mass_props[4]*1_000_000} mm^2")
+        return mass_props[4]*1_000_000
+    elif unit == "m2":
+        print(f"Surface Area: {mass_props[4]} m^2")
+        return mass_props[4]
+    else:
+        return print("wrong unit, use 'mm2' or 'm2'")

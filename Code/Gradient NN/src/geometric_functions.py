@@ -42,12 +42,12 @@ def preprocess(points):
     return (points - mean_p) / (0.5 * bbdiag)
 
 
-# def find_neighbors(kdtree, index, k):
-    
+# def find_neighbors(kdtree, index, points, k):
+#     point_distances, patch_point_inds = kdtree.query(points[index, :], k=searchK)
     
 
     
-#     pca_points()
+#     aligne_neighborhood = standardize_pointcloud(points)
     
 #     return neighborhood
 
