@@ -71,3 +71,9 @@ def pca_points(patch_points):
 
     return aligned
 
+def calculate_point_density(surface_area, pointcloud):
+    point_density = len(pointcloud) / surface_area    
+    return point_density
+
+
+
