@@ -98,6 +98,9 @@ def Create_geometry(shape: str, output_path: str, params: dict):
     elif shape == "curve":
         part_path = os.path.abspath("./Curved surface/Curved_surface.SLDPRT") 
         params_file = os.path.abspath("./Curved surface/parameters.txt")
+    elif shape == "angle_curve":
+        part_path = os.path.abspath("./Angle_curve/angle_curve.SLDPRT") 
+        params_file = os.path.abspath("./Angle_curve/parameters.txt")    
     else:
         raise RuntimeError("❌ Missing or wrong shape input parameter!")
     
