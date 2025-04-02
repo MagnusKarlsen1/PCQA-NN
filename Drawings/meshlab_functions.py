@@ -3,21 +3,24 @@ import numpy as np
 from sklearn.neighbors import NearestNeighbors
 
 
+
 def sample_stl_by_point_distance(input_stl, output_xyz, sampling_distance):
     ms = pymeshlab.MeshSet()
     ms.load_new_mesh(input_stl)
 
-
-    # Perform Poisson Disk sampling (or Monte Carlo) to get uniform points
+    # Poisson disk sampling
     ms.generate_sampling_poisson_disk(
         radius=pymeshlab.PureValue(sampling_distance)
-
     )
-   
-    # Save as XYZ point cloud (you can also save as PLY, STL, etc.)
-    ms.save_current_mesh(output_xyz)
 
-    print(f"✅ Resampled mesh saved to: {output_xyz}")
+    # Get the resampled point cloud
+    sampled_mesh = ms.current_mesh()
+    points = sampled_mesh.vertex_matrix()  # shape (N, 3)
+    
+    # Save only XYZ (first 3 columns) to txt or xyz format
+    np.savetxt(output_xyz, points[:, :3], fmt="%.6f")
+
+    print(f"✅ Resampled point cloud saved (XYZ only): {output_xyz}")
 
 
 

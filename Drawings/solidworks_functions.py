@@ -55,6 +55,36 @@ def update_parameter_file(param_file, params):
 
 #######################################################################
 
+def get_part_and_params(shape = "ball"):
+    if shape == "ball": 
+        part_path = os.path.abspath("./Ball/Ball.SLDPRT")
+        params_file = os.path.abspath("./Ball/parameters.txt")
+    elif shape == "saddle":
+        part_path = os.path.abspath("./Saddle/Saddle.SLDPRT")
+        params_file = os.path.abspath("./Saddle/parameters.txt")
+    elif shape == "box":
+        part_path = os.path.abspath("./Edge/Box.SLDPRT")
+        params_file = "./Edge/parameters.txt"
+    elif shape == "curve":
+        part_path = os.path.abspath("./Curved surface/Curved_surface.SLDPRT") 
+        params_file = os.path.abspath("./Curved surface/parameters.txt")
+    elif shape == "mix":
+        part_path_1 = os.path.abspath("./Ball/Ball.SLDPRT")
+        params_file_1 = os.path.abspath("./Ball/parameters.txt")
+        part_path_2 = os.path.abspath("./Saddle/Saddle.SLDPRT")
+        params_file_2 = os.path.abspath("./Saddle/parameters.txt")
+        part_path_3 = os.path.abspath("./Edge/Box.SLDPRT")
+        params_file_3 = "./Edge/parameters.txt"
+        part_path_4 = os.path.abspath("./Curved surface/Curved_surface.SLDPRT") 
+        params_file_4 = os.path.abspath("./Curved surface/parameters.txt")
+        
+        part_path = [part_path_1, part_path_2, part_path_3, part_path_4]
+        params_file = [params_file_1, params_file_2, params_file_3, params_file_4]
+            
+    else:
+        raise RuntimeError("❌ Missing or wrong shape input parameter!")
+    return part_path, params_file
+
 def Create_geometry(shape: str, output_path: str, params: dict):
     if shape == "ball": 
         part_path = os.path.abspath("./Ball/Ball.SLDPRT")
