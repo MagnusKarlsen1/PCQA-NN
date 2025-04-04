@@ -44,8 +44,7 @@ def main(neighborhood_size, params, shape = "angle_curve", noise = False, holes 
     output_path_xyz = os.path.join(BASE_DIR, "..", "Data", "Training_data", "PerPoint.xyz")
     
     features_list = []
-    eigenvector_list = []
-    eigenvalues_list = []
+    
     # part_path, params = sf.get_part_and_params(shape)
     
     
@@ -54,7 +53,7 @@ def main(neighborhood_size, params, shape = "angle_curve", noise = False, holes 
     
     
     # Create pointcloud
-    point_dist = 0.2
+    point_dist = 0.5
     raw_pointcloud = mf.sample_stl_by_point_distance(output_path_STL, output_path_xyz, point_dist)
     
     # Optionals: 
@@ -73,8 +72,8 @@ def main(neighborhood_size, params, shape = "angle_curve", noise = False, holes 
         
         # Create holes
     if holes:
-        num_holes = 10
-        hole_size = 20
+        num_holes = 1
+        hole_size = 1000
         
         pointcloud = mf.create_mesh_holes(pointcloud, num_holes, hole_size)
         print("Creating holes in pointcloud")
@@ -84,7 +83,7 @@ def main(neighborhood_size, params, shape = "angle_curve", noise = False, holes 
     # Calculate point density
     area = sf.get_surface_area(model, "mm2")
     surface_density = gf.calculate_point_density(area, pointcloud)
-    
+    radius_list = []
     
     # Calculate gradients
     _, gradients, curvature_ours = gf.get_nn_data(pointcloud, neighborhood_size, 2)
@@ -104,19 +103,18 @@ def main(neighborhood_size, params, shape = "angle_curve", noise = False, holes 
         points_inside_ball, radius = gf.points_inside_ball(pointcloud, kdtree, index, distances)
         volume_density = gf.calculate_ball_density(radius, points_inside_ball)
         
+        radius_list.append(radius)
         # Calculate curvature
-        features_jax, eigenvectors, eigenvalues = gf.compute_geometric_properties(neighborhood)
+        features_jax = gf.compute_geometric_properties(neighborhood)
         features = np.array(features_jax)  # Convert to regular NumPy array
-        features = features.tolist()      # Now it's a list of floats 
+        features = features.tolist()      # Now it's a list of floats
         
-        
-        eigenvector_list.append(eigenvectors.tolist())
-        eigenvalues_list.append(eigenvalues.tolist()) 
         
         # Get gradient vector(s) for the current point
         grad_vectors = gradients[index]           # shape: (k, 2)
         grad_flat = grad_vectors.flatten().tolist()
 
+        
         # Get curvature value for the current point
         curv_value = curvature_ours[index]
 
@@ -125,35 +123,88 @@ def main(neighborhood_size, params, shape = "angle_curve", noise = False, holes 
         
         features_list.append(feature_row)
     
-    eigenvectors_list = np.array(eigenvector_list)
-    eigenvalues_list = np.array(eigenvalues_list)
     
-    np.savetxt("./Eigenvectors.txt", eigenvectors_list, fmt="%.6f", delimiter=" ")
-    np.savetxt("./Eigenvalues.txt", eigenvalues_list, fmt="%.6f", delimiter=" ")
     
     ############# TEST med curvature ##############
     
-    # 1. Take the first two columns of the pointcloud
-    test = np.array(pointcloud[:, :3])  # shape: (N, 2)
-    features_array_test = np.array(features_list)
+    # # 1. Take the first two columns of the pointcloud
+    # test = np.array(pointcloud[:, :3])  # shape: (N, 2)
+    # features_array_test = np.array(features_list)
 
-    # 2. Get the curvature column (assumes 1D array of shape (N,))
-    curvature_test = features_array_test[:,0]     # or whatever column index represents curvature
 
-    # 3. Normalize curvature
-    # curvature_tester = gf.min_max_scale(curvature_test)
-    # curvature_tester = curvature_tester.reshape(-1, 1)  # reshape to (N, 1) for hstack
+    # # 2. Get the curvature column (assumes 1D array of shape (N,))
+    # curvature_test = features_array_test[:,0]     # or whatever column index represents curvature
 
-    # 4. Stack coordinates and normalized curvature
-    test = np.hstack([test, curvature_test.reshape(-1,1)])  # shape: (N, 3)
+    # # 3. Normalize curvature
+    # # curvature_tester = gf.min_max_scale(curvature_test)
+    # # curvature_tester = curvature_tester.reshape(-1, 1)  # reshape to (N, 1) for hstack
 
-    # 5. Save to file
-    np.savetxt("./denHER.txt", test, fmt="%.6f", delimiter=" ")
+    # # 4. Stack coordinates and normalized curvature
+    # test = np.hstack([test, curvature_test.reshape(-1,1)])  # shape: (N, 3)
+
+    # # 5. Save to file
+    # np.savetxt("./denHER.txt", test, fmt="%.6f", delimiter=" ")
+    
     
     ###############################################    
-    
-    
     features_array = np.array(features_list)
+    all_radius = np.array(radius_list)
+    
+    new_radius = np.average(all_radius)
+    print(type(new_radius))
+    Quality_score = []
+    label = []
+    
+    
+    tree = cKDTree(pointcloud)
+    
+    
+    for index2 in tqdm(range(len(pointcloud)), desc="Second process"):
+        
+        indices = tree.query_ball_point(pointcloud[index2], new_radius)
+
+        # The number of points inside the sphere
+        num_points_inside_sphere = len(indices)
+        
+        label.append(int(num_points_inside_sphere))
+        
+        quality = num_points_inside_sphere/neighborhood_size
+        
+        # Quality_score.append(quality)
+        if quality > 0.76:
+            Quality_score.append(1)
+        else:
+            Quality_score.append(0)
+        
+        
+        
+        
+        # if num_points_inside_sphere >= neighborhood_size:
+        #     Quality_score.append(1)
+            
+        # else:
+        #     Quality_score.append(0)
+
+    
+    labels = np.array(label)
+    Quality_score = np.array(Quality_score)
+
+    
+    
+    test = np.array(pointcloud[:, :3])  # shape: (N, 2)
+    test = np.hstack([test, Quality_score.reshape(-1,1)])  # shape: (N, 3)
+
+    # 5. Save to file
+    np.savetxt("./quality_test.txt", test, fmt="%.6f", delimiter=" ")
+    np.savetxt("./labels.txt", labels, header="Label", fmt="%.6f", delimiter=" ")
+    
+    
+    
+    
+    
+    
+    
+    
     header = ["Eigenvalue_curvature", "anisotropy", "linearity", "planarity", "sphericity", "variation"]
     header += ["grad_x", "grad_y", "mean_curvature", "surface_density", "Volume_Density"]
         
@@ -169,6 +220,9 @@ def main(neighborhood_size, params, shape = "angle_curve", noise = False, holes 
     return features_array, pointcloud
 
 
+
+
+
 if __name__ == "__main__":
     
     params_ball = {"radius": 10}
@@ -176,7 +230,7 @@ if __name__ == "__main__":
     params = {"angle": 150,
               "thicknes": 20,
               "diameter": 10}
-    main(40, params=params, shape="angle_curve")
+    main(20, params=params, shape="angle_curve", holes=False)
 
 
 
