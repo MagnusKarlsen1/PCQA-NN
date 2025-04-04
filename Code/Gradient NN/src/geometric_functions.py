@@ -43,10 +43,8 @@ def compute_geometric_properties(neighborhood):
     variation = eigenvalues[0] / (eigenvalues[0] + eigenvalues[2])
     
     
-    
-    
     # Return the properties as a JAX array for faster computations later
-    return jnp.array([curvature, anisotropy, linearity, planarity, sphericity, variation])
+    return jnp.array([curvature, anisotropy, linearity, planarity, sphericity, variation]), eigenvectors, eigenvalues
 
 
 @jit
@@ -58,11 +56,11 @@ def preprocess(points):
 
 
 def find_neighbors(kdtree, index, points, searchK):
-    _, indices = kdtree.query([points[index]], k=searchK)
+    distances, indices = kdtree.query([points[index]], k=searchK)
     neighborhood = points[indices[0]]
     aligned_neighborhood = standardize_patch(neighborhood)
     
-    return aligned_neighborhood, neighborhood, indices[0]
+    return aligned_neighborhood, neighborhood, indices[0], distances
 
 def pca_points(patch_points):
     # 1. Center the patch around the mean
@@ -183,3 +181,30 @@ def L2norm_nbh(data, comparison_size, origin_index=0):
     dist = jnp.linalg.norm(data_jax - origin[:, None, :], axis=2)
 
     return dist  # Shape: (batch_size, num_neighbors)
+
+
+def points_inside_ball(pointcloud, kdtree, index, distances):
+    """
+    Computes number of points inside a ball defined by k nearest neighbors.
+
+    Returns:
+        count_inside_ball (int): Number of points inside the ball
+        radius (float): Radius of the ball
+    """
+    # Step 1: Get radius as max distance to neighbor
+    radius = np.max(distances)
+
+    # Step 2: Query all points within radius
+    indices_in_ball = kdtree.query_ball_point(pointcloud[index], r=radius)
+
+    return int(len(indices_in_ball)), radius
+
+def calculate_ball_density(radius: float, points_inside_ball):
+    volume = (4/3) * np.pi*radius**3 
+    
+    volume_density = points_inside_ball/volume
+
+    return volume_density
+
+def min_max_scale(array):
+    return (array - np.min(array)) / (np.max(array) - np.min(array))
