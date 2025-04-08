@@ -36,7 +36,7 @@ import geometric_functions as gf
 ############################
 
 
-def main(neighborhood_size, params, shape = "angle_curve", noise = False, holes = False):
+def main(neighborhood_size, params, shape = "angle_curve", mesh_size = 1, noise = False, holes = False):
     
     BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
@@ -53,7 +53,7 @@ def main(neighborhood_size, params, shape = "angle_curve", noise = False, holes 
     
     
     # Create pointcloud
-    point_dist = 0.5
+    point_dist = mesh_size
     raw_pointcloud = mf.sample_stl_by_point_distance(output_path_STL, output_path_xyz, point_dist)
     
     # Optionals: 
@@ -78,7 +78,7 @@ def main(neighborhood_size, params, shape = "angle_curve", noise = False, holes 
         pointcloud = mf.create_mesh_holes(pointcloud, num_holes, hole_size)
         print("Creating holes in pointcloud")
         
-    mf.save_neighborhood_to_txt(pointcloud, "./Pre_neighborhood_cloud.txt")    
+    # mf.save_neighborhood_to_txt(pointcloud, "./Pre_neighborhood_cloud.txt")    
     
     # Calculate point density
     area = sf.get_surface_area(model, "mm2")
@@ -105,7 +105,7 @@ def main(neighborhood_size, params, shape = "angle_curve", noise = False, holes 
         
         radius_list.append(radius)
         # Calculate curvature
-        features_jax = gf.compute_geometric_properties(neighborhood)
+        features_jax, _, _ = gf.compute_geometric_properties(neighborhood)
         features = np.array(features_jax)  # Convert to regular NumPy array
         features = features.tolist()      # Now it's a list of floats
         
@@ -166,58 +166,56 @@ def main(neighborhood_size, params, shape = "angle_curve", noise = False, holes 
         # The number of points inside the sphere
         num_points_inside_sphere = len(indices)
         
-        label.append(int(num_points_inside_sphere))
+        label_row = [num_points_inside_sphere] + [new_radius]
         
-        quality = num_points_inside_sphere/neighborhood_size
-        
-        # Quality_score.append(quality)
-        if quality > 0.76:
-            Quality_score.append(1)
-        else:
-            Quality_score.append(0)
+        label.append(label_row)
         
         
+    #     quality = num_points_inside_sphere/neighborhood_size
+        
+    #     # Quality_score.append(quality)
+    #     if quality > 0.76:
+    #         Quality_score.append(1)
+    #     else:
+    #         Quality_score.append(0)
         
         
-        # if num_points_inside_sphere >= neighborhood_size:
-        #     Quality_score.append(1)
+        
+        
+    #     # if num_points_inside_sphere >= neighborhood_size:
+    #     #     Quality_score.append(1)
             
-        # else:
-        #     Quality_score.append(0)
+    #     # else:
+    #     #     Quality_score.append(0)
 
     
     labels = np.array(label)
-    Quality_score = np.array(Quality_score)
+    # Quality_score = np.array(Quality_score)
 
     
     
-    test = np.array(pointcloud[:, :3])  # shape: (N, 2)
-    test = np.hstack([test, Quality_score.reshape(-1,1)])  # shape: (N, 3)
+    # test = np.array(pointcloud[:, :3])  # shape: (N, 2)
+    # test = np.hstack([test, Quality_score.reshape(-1,1)])  # shape: (N, 3)
 
-    # 5. Save to file
-    np.savetxt("./quality_test.txt", test, fmt="%.6f", delimiter=" ")
-    np.savetxt("./labels.txt", labels, header="Label", fmt="%.6f", delimiter=" ")
+    # # 5. Save to file
+    # np.savetxt("./quality_test.txt", test, fmt="%.6f", delimiter=" ")
+    # np.savetxt("./labels.txt", labels, , fmt="%.6f", delimiter=" ")
     
     
     
     
     
     
-    
-    
-    header = ["Eigenvalue_curvature", "anisotropy", "linearity", "planarity", "sphericity", "variation"]
-    header += ["grad_x", "grad_y", "mean_curvature", "surface_density", "Volume_Density"]
-        
     # Calculate edge number based on neighbors
     
     # Save all data in a np.array
     # PC_numpy = 
     
-    output_path_features = os.path.join(BASE_DIR, "..", "Data", "Training_data", "Feature_list.txt")
+    # output_path_features = os.path.join(BASE_DIR, "..", "Data", "Training_data", "Feature_list.txt")
     # Save to txt file
-    mf.save_neighborhood_to_txt(features_array, output_path_features)
-    np.savetxt(output_path_features, features_array, fmt="%.6f", delimiter=" ", header=" ".join(header), comments="")
-    return features_array, pointcloud
+    # mf.save_neighborhood_to_txt(features_array, output_path_features)
+    # np.savetxt(output_path_features, features_array, fmt="%.6f", delimiter=" ", header=" ".join(header), comments="")
+    return features_array, pointcloud, labels
 
 
 

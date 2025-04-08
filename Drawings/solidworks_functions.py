@@ -73,7 +73,21 @@ def get_part_and_params(shape="ball"):
     elif shape == "curve":
         part_path = os.path.join(BASE_DIR, "Curved surface", "Curved_surface.SLDPRT")
         params_file = os.path.join(BASE_DIR, "Curved surface", "parameters.txt")
-
+    elif shape == "wedge":
+        part_path = os.path.join(BASE_DIR, "wedge", "wedge.SLDPRT")
+        params_file = os.path.join(BASE_DIR, "wedge", "parameters.txt")
+    elif shape == "donut":
+        part_path = os.path.join(BASE_DIR, "Donut", "donut.SLDPRT")
+        params_file = os.path.join(BASE_DIR, "Donut", "parameters.txt")
+    elif shape == "donut_center":
+        part_path = os.path.join(BASE_DIR, "Donut_w_center", "Donut_w_center.SLDPRT")
+        params_file = os.path.join(BASE_DIR, "Donut_w_center", "parameters.txt")
+    elif shape == "nut":
+        part_path = os.path.join(BASE_DIR, "Nut", "nut.SLDPRT")
+        params_file = os.path.join(BASE_DIR, "Nut", "parameters.txt")
+    elif shape == "heart":
+        part_path = os.path.join(BASE_DIR, "Heart", "heart.SLDPRT")
+        params_file = os.path.join(BASE_DIR, "Heart", "parameters.txt")
     elif shape == "mix":
         part_path = [
             os.path.join(BASE_DIR, "Ball", "Ball.SLDPRT"),
@@ -112,6 +126,22 @@ def Create_geometry(shape: str, output_path: str, params: dict):
     elif shape == "angle_curve":
         part_path = os.path.join(BASE_DIR, "Angle_curve", "angle_curve.SLDPRT")
         params_file = os.path.join(BASE_DIR, "Angle_curve", "equations.txt")
+    elif shape == "wedge":
+        part_path = os.path.join(BASE_DIR, "wedge", "wedge.SLDPRT")
+        params_file = os.path.join(BASE_DIR, "wedge", "parameters.txt")
+    elif shape == "donut":
+        part_path = os.path.join(BASE_DIR, "Donut", "donut.SLDPRT")
+        params_file = os.path.join(BASE_DIR, "Donut", "parameters.txt")
+    elif shape == "donut_center":
+        part_path = os.path.join(BASE_DIR, "Donut_w_center", "Donut_w_center.SLDPRT")
+        params_file = os.path.join(BASE_DIR, "Donut_w_center", "parameters.txt")
+    elif shape == "nut":
+        part_path = os.path.join(BASE_DIR, "Nut", "nut.SLDPRT")
+        params_file = os.path.join(BASE_DIR, "Nut", "parameters.txt")
+    elif shape == "heart":
+        part_path = os.path.join(BASE_DIR, "Heart", "heart.SLDPRT")
+        params_file = os.path.join(BASE_DIR, "Heart", "parameters.txt")
+    
     else:
         raise RuntimeError("❌ Missing or wrong shape input parameter!")
     
