@@ -441,4 +441,4 @@ def Get_variables(path, k=50, edge_k=20, edge_thresh=0.06, plane_overlap=6, plot
 
         plt.show()
     
-    return edge, plane, curvature, linearity, planarity, sphericity, omnivaraiance, eigentropy, anisotropy, eigensum
+    return [edge, plane, curvature, linearity, planarity, sphericity, omnivaraiance, eigentropy, anisotropy, eigensum]
