@@ -220,7 +220,7 @@ def calculate_ball_density(radius: float, points_inside_ball):
 def min_max_scale(array):
     return (array - np.min(array)) / (np.max(array) - np.min(array))
 
-def Edge_and_Plane(path, edge_k = 10, plane_overlap = 6, edge_thresh = 0.03, plane_deviation = 1e-4, min_planesize = 20):
+def Edge_and_Plane(path, edge_k = 10, plane_overlap = 6, edge_thresh = 0.06, plane_thresh = 0.001, plane_deviation = 0.0001, min_planesize = 20):
     # Load the XYZ file as a DataFrame
     df = pd.read_csv(path, sep=" ", usecols=[0, 1, 2], names=["x", "y", "z"])
     df["row_index"] = df.index
@@ -233,11 +233,22 @@ def Edge_and_Plane(path, edge_k = 10, plane_overlap = 6, edge_thresh = 0.03, pla
 
     tree = pc.add_structure("kdtree")
     nbh_curv = pc.get_neighbors(k=edge_k, kdtree=tree) 
-    eigenField = pc.add_scalar_field("eigen_values", k_neighbors=nbh_curv)
-    curvfield = pc.add_scalar_field("curvature", ev = eigenField)
+    eigen_curv = pc.add_scalar_field("eigen_values", k_neighbors=nbh_curv)
+    curvfield = pc.add_scalar_field("curvature", ev = eigen_curv)
     curvature = pc.points['curvature('+str(edge_k+1)+')'].values
 
+    tree = pc.add_structure("kdtree")
+    nbh_omni = pc.get_neighbors(k=min_planesize, kdtree=tree) 
+    eigen_omni = pc.add_scalar_field("eigen_values", k_neighbors=nbh_omni)
+    omnivarfield = pc.add_scalar_field("omnivariance", ev = eigen_omni)
+    omnivaraiance = pc.points['omnivariance('+str(min_planesize+1)+')'].values
+
+    nbh_origin = np.hstack((pc.points['row_index'].values.reshape(-1,1), nbh_curv))
+    
+    plane_deviation = np.mean(L2norm_nbh(pc_array[nbh_origin,:],5)) * plane_deviation
+
     plane_size = min_planesize
+
     while plane_size >= min_planesize:
         plane_field = pc.add_scalar_field("plane_fit", max_dist=plane_deviation, max_iterations=500)
         plane = pc.points['is_plane'].values.reshape(-1,1)
@@ -253,15 +264,13 @@ def Edge_and_Plane(path, edge_k = 10, plane_overlap = 6, edge_thresh = 0.03, pla
     if pc_array.shape[1] == 3:
         pc_array = np.hstack((pc_array, np.zeros_like(x).reshape(-1,1)))
 
-    nbh_plane = knn_graph(pc_array[:,0:3], plane_overlap)
-    __, col_plane = nbh_plane
     num_planes = len(pc_array[0,3:])
-    plane_count = np.count_nonzero(np.sum(pc_array[col_plane,3:].reshape(-1,plane_overlap,num_planes), axis=1), axis=1)
+    plane_count = np.count_nonzero(np.sum(pc_array[nbh_origin[:,:plane_overlap],3:], axis=1), axis=1)
     edge_index = np.where((plane_count > 1) | (curvature >= edge_thresh))[0]
     edges = np.zeros_like(x)
     edges[edge_index,0] = 1
 
-    plane_index = np.where((plane_count == 1) & (edges[:,0] != 1))[0]
+    plane_index = np.where(((plane_count == 1) | (omnivaraiance <= plane_thresh)) & (edges[:,0] != 1))[0]
     planes = np.zeros_like(x)
     planes[plane_index,0] = 1
     return edges, planes
@@ -307,9 +316,9 @@ def Scalar_fields(path, k = 50):
 
     return curvature, linearity, planarity, sphericity, omnivaraiance, eigentropy, anisotropy, eigensum
 
-def Get_variables(path, k=50, edge_k=20, edge_thresh=0.06, plane_overlap=6, plot="No", save="yes"):
+def Get_variables(path, k=50, edge_k=10, edge_thresh=0.06, plane_thresh=0.001, plane_overlap=6, min_planesize=20, plot="No", save="yes"):
     curvature, linearity, planarity, sphericity, omnivaraiance, eigentropy, anisotropy, eigensum = Scalar_fields(path, k=k)
-    edge, plane = Edge_and_Plane(path, edge_k=edge_k, plane_overlap=plane_overlap, edge_thresh=edge_thresh)
+    edge, plane = Edge_and_Plane(path, edge_k=edge_k, plane_overlap=plane_overlap, edge_thresh=edge_thresh, plane_thresh=plane_thresh, min_planesize=min_planesize)
     xyz = np.loadtxt(path)[:,0:3]
 
     if save == "yes":
