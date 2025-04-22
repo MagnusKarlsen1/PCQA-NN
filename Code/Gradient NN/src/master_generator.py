@@ -107,8 +107,8 @@ def run_batch(neighborhood_size=20):
     
     header = ["Eigenvalue_curvature", "anisotropy", "linearity", "planarity", "sphericity", "variation", "grad_x", "grad_y", "mean_curvature", "surface_density", "Volume_Density"]
     BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-    feature_PATH = os.path.abspath(os.path.join(BASE_DIR, "../Data/Training_data/big_test_features.txt"))
-    label_PATH = os.path.abspath(os.path.join(BASE_DIR, "../Data/Training_data/big_test_labels.txt"))
+    feature_PATH = os.path.abspath(os.path.join(BASE_DIR, "../Data/Training_data/big_test_features_5.txt"))
+    label_PATH = os.path.abspath(os.path.join(BASE_DIR, "../Data/Training_data/big_test_labels_5.txt"))
     np.savetxt(feature_PATH, features_total_np, delimiter=" ", fmt="%.6f", header=" ".join(header))
     np.savetxt(label_PATH, labels_total_np, delimiter=" ", fmt="%.6f", header=" ".join(header_label))
         
@@ -117,7 +117,7 @@ def run_batch(neighborhood_size=20):
         
 if __name__ == "__main__":
     
-    run_batch(20)
+    run_batch(5)
 
 
 

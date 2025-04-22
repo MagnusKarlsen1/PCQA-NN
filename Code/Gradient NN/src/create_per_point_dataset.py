@@ -128,8 +128,8 @@ def main(neighborhood_size, params, shape = "angle_curve", noise = False, holes 
     eigenvectors_list = np.array(eigenvector_list)
     eigenvalues_list = np.array(eigenvalues_list)
     
-    np.savetxt("./Eigenvectors.txt", eigenvectors_list, fmt="%.6f", delimiter=" ")
-    np.savetxt("./Eigenvalues.txt", eigenvalues_list, fmt="%.6f", delimiter=" ")
+    # np.savetxt("./Eigenvectors.txt", eigenvectors_list, fmt="%.6f", delimiter=" ")
+    # np.savetxt("./Eigenvalues.txt", eigenvalues_list, fmt="%.6f", delimiter=" ")
     
     ############# TEST med curvature ##############
     
