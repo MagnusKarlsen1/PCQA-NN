@@ -7,6 +7,17 @@ from pcdiff import knn_graph, estimate_basis, build_grad_div, laplacian, coords_
 import torch
 import jax
 
+from pyntcloud import PyntCloud 
+import pandas as pd
+import numpy as np
+from mpl_toolkits.mplot3d import Axes3D 
+import matplotlib.pyplot as plt 
+import pandas as pd
+import os
+import sys
+import pdb
+from pcdiff import knn_graph
+
 def standardize_patch(pointcloud):
     mean = pointcloud.mean(axis=0)
     centered = pointcloud - mean
@@ -208,3 +219,226 @@ def calculate_ball_density(radius: float, points_inside_ball):
 
 def min_max_scale(array):
     return (array - np.min(array)) / (np.max(array) - np.min(array))
+
+def Edge_and_Plane(path, edge_k = 10, plane_overlap = 6, edge_thresh = 0.03, plane_deviation = 1e-4, min_planesize = 20):
+    # Load the XYZ file as a DataFrame
+    df = pd.read_csv(path, sep=" ", usecols=[0, 1, 2], names=["x", "y", "z"])
+    df["row_index"] = df.index
+    # Convert DataFrame to a PyntCloud object
+    pc = PyntCloud(df)
+    x = pc.points['x'].values.reshape(-1,1)
+    y = pc.points['y'].values.reshape(-1,1)
+    z = pc.points['z'].values.reshape(-1,1)
+    pc_array = np.hstack((x,y,z))
+
+    tree = pc.add_structure("kdtree")
+    nbh_curv = pc.get_neighbors(k=edge_k, kdtree=tree) 
+    eigenField = pc.add_scalar_field("eigen_values", k_neighbors=nbh_curv)
+    curvfield = pc.add_scalar_field("curvature", ev = eigenField)
+    curvature = pc.points['curvature('+str(edge_k+1)+')'].values
+
+    plane_size = min_planesize
+    while plane_size >= min_planesize:
+        plane_field = pc.add_scalar_field("plane_fit", max_dist=plane_deviation, max_iterations=500)
+        plane = pc.points['is_plane'].values.reshape(-1,1)
+        plane_size = np.sum(plane[:,0], axis=0)
+        
+        if plane_size >= min_planesize:
+            row_indicies = pc.points['row_index'].values.reshape(-1,1)
+            plane_col = np.zeros_like(x)
+            plane_col[row_indicies[np.where(plane == 1)[0]]] = 1
+            pc_array = np.hstack((pc_array,plane_col))
+            pc.points = pc.points[pc.points['is_plane'] != 1]
+
+    if pc_array.shape[1] == 3:
+        pc_array = np.hstack((pc_array, np.zeros_like(x).reshape(-1,1)))
+
+    nbh_plane = knn_graph(pc_array[:,0:3], plane_overlap)
+    __, col_plane = nbh_plane
+    num_planes = len(pc_array[0,3:])
+    plane_count = np.count_nonzero(np.sum(pc_array[col_plane,3:].reshape(-1,plane_overlap,num_planes), axis=1), axis=1)
+    edge_index = np.where((plane_count > 1) | (curvature >= edge_thresh))[0]
+    edges = np.zeros_like(x)
+    edges[edge_index,0] = 1
+
+    plane_index = np.where((plane_count == 1) & (edges[:,0] != 1))[0]
+    planes = np.zeros_like(x)
+    planes[plane_index,0] = 1
+    return edges, planes
+
+
+def Scalar_fields(path, k = 50):
+    df = pd.read_csv(path, sep=" ", usecols=[0, 1, 2], names=["x", "y", "z"])
+    df["row_index"] = df.index
+    pc = PyntCloud(df)
+    x = pc.points['x'].values.reshape(-1,1)
+    y = pc.points['y'].values.reshape(-1,1)
+    z = pc.points['z'].values.reshape(-1,1)
+    pc_array = np.hstack((x,y,z))
+
+    tree = pc.add_structure("kdtree")
+    nbh_curv = pc.get_neighbors(k=k, kdtree=tree)
+
+    eigenField = pc.add_scalar_field("eigen_values", k_neighbors=nbh_curv)
+
+    curvfield = pc.add_scalar_field("curvature", ev = eigenField)
+    curvature = pc.points['curvature('+str(k+1)+')'].values.reshape(-1,1)
+
+    linfield = pc.add_scalar_field("linearity", ev = eigenField)
+    linearity = pc.points['linearity('+str(k+1)+')'].values.reshape(-1,1)
+
+    planfield = pc.add_scalar_field("planarity", ev = eigenField)
+    planarity = pc.points['planarity('+str(k+1)+')'].values.reshape(-1,1)
+
+    spherefield = pc.add_scalar_field("sphericity", ev = eigenField)
+    sphericity = pc.points['sphericity('+str(k+1)+')'].values.reshape(-1,1)
+
+    omnivarfield = pc.add_scalar_field("omnivariance", ev = eigenField)
+    omnivaraiance = pc.points['omnivariance('+str(k+1)+')'].values.reshape(-1,1)
+
+    eigentropyfield = pc.add_scalar_field("eigenentropy", ev = eigenField)
+    eigentropy = pc.points['eigenentropy('+str(k+1)+')'].values.reshape(-1,1)
+
+    anisofield = pc.add_scalar_field("anisotropy", ev = eigenField)
+    anisotropy = pc.points['anisotropy('+str(k+1)+')'].values.reshape(-1,1)
+
+    eigensum_field = pc.add_scalar_field("eigen_sum", ev = eigenField)
+    eigensum = pc.points['eigen_sum('+str(k+1)+')'].values.reshape(-1,1)
+
+    return curvature, linearity, planarity, sphericity, omnivaraiance, eigentropy, anisotropy, eigensum
+
+def Get_variables(path, k=50, edge_k=20, edge_thresh=0.06, plane_overlap=6, plot="No", save="yes"):
+    curvature, linearity, planarity, sphericity, omnivaraiance, eigentropy, anisotropy, eigensum = Scalar_fields(path, k=k)
+    edge, plane = Edge_and_Plane(path, edge_k=edge_k, plane_overlap=plane_overlap, edge_thresh=edge_thresh)
+    xyz = np.loadtxt(path)[:,0:3]
+
+    if save == "yes":
+        BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+        save_path = os.path.join(BASE_DIR, "Pointcloud_Data", "PC_variables.xyz")
+        PC_variables = np.hstack((xyz, edge, plane, curvature, linearity, planarity, sphericity, omnivaraiance, eigentropy, anisotropy, eigensum))
+        np.savetxt(save_path, PC_variables, fmt="%.6f", delimiter=" ")
+
+    if plot == "yes":
+        # edge
+        fig = plt.figure()
+        ax = fig.add_subplot(111, projection='3d')
+
+        scatter = ax.scatter(xyz[:, 0], xyz[:, 1], xyz[:, 2],
+                            c=edge, cmap='viridis')
+
+        fig.colorbar(scatter, ax=ax, label='edge')
+
+        plt.show()
+
+        # plane
+        fig = plt.figure()
+        ax = fig.add_subplot(111, projection='3d')
+
+        scatter = ax.scatter(xyz[:, 0], xyz[:, 1], xyz[:, 2],
+                            c=plane, cmap='viridis')
+
+        fig.colorbar(scatter, ax=ax, label='Plane')
+
+        plt.show()
+
+        # curvature
+        fig = plt.figure()
+        ax = fig.add_subplot(111, projection='3d')
+
+        scatter = ax.scatter(xyz[:, 0], xyz[:, 1], xyz[:, 2],
+                            c=curvature, cmap='viridis')
+
+        fig.colorbar(scatter, ax=ax, label='Curvature')
+
+        plt.show()
+
+        #Linearity
+        fig = plt.figure()
+        ax = fig.add_subplot(111, projection='3d')
+
+        scatter = ax.scatter(xyz[:, 0], xyz[:, 1], xyz[:, 2],
+                            c=linearity, cmap='viridis')
+
+        fig.colorbar(scatter, ax=ax, label='Linearity')
+
+        plt.show()
+
+        #Planarity
+        fig = plt.figure()
+        ax = fig.add_subplot(111, projection='3d')
+
+        xyz = np.loadtxt(path)
+
+        scatter = ax.scatter(xyz[:, 0], xyz[:, 1], xyz[:, 2],
+                            c=planarity, cmap='viridis')
+
+        fig.colorbar(scatter, ax=ax, label='Planarity')
+
+        plt.show()
+
+        #Sphericity
+        fig = plt.figure()
+        ax = fig.add_subplot(111, projection='3d')
+
+        xyz = np.loadtxt(path)
+
+        scatter = ax.scatter(xyz[:, 0], xyz[:, 1], xyz[:, 2],
+                            c=sphericity, cmap='viridis')
+
+        fig.colorbar(scatter, ax=ax, label='Sphericity')
+
+        plt.show()
+
+        #Omnivariance
+        fig = plt.figure()
+        ax = fig.add_subplot(111, projection='3d')
+
+        xyz = np.loadtxt(path)
+
+        scatter = ax.scatter(xyz[:, 0], xyz[:, 1], xyz[:, 2],
+                            c=omnivaraiance, cmap='viridis')
+
+        fig.colorbar(scatter, ax=ax, label='Omnivariance')
+
+        plt.show()
+
+        #Eigentropy
+        fig = plt.figure()
+        ax = fig.add_subplot(111, projection='3d')
+
+        xyz = np.loadtxt(path)
+
+        scatter = ax.scatter(xyz[:, 0], xyz[:, 1], xyz[:, 2],
+                            c=eigentropy, cmap='viridis')
+
+        fig.colorbar(scatter, ax=ax, label='Eigentropy')
+
+        plt.show()
+
+        #Anisotropy
+        fig = plt.figure()
+        ax = fig.add_subplot(111, projection='3d')
+
+        xyz = np.loadtxt(path)
+
+        scatter = ax.scatter(xyz[:, 0], xyz[:, 1], xyz[:, 2],
+                            c=anisotropy, cmap='viridis')
+
+        fig.colorbar(scatter, ax=ax, label='Anisotropy')
+
+        plt.show()
+
+        #Eigensum
+        fig = plt.figure()
+        ax = fig.add_subplot(111, projection='3d')
+
+        xyz = np.loadtxt(path)
+
+        scatter = ax.scatter(xyz[:, 0], xyz[:, 1], xyz[:, 2],
+                            c=eigensum, cmap='viridis')
+
+        fig.colorbar(scatter, ax=ax, label='Eigensum')
+
+        plt.show()
+    
+    return edge, plane, curvature, linearity, planarity, sphericity, omnivaraiance, eigentropy, anisotropy, eigensum
