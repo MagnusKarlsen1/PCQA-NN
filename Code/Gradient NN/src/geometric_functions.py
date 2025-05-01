@@ -321,7 +321,7 @@ def Get_variables(path, k=50, edge_k=10, edge_thresh=0.06, plane_thresh=0.001, p
     edge, plane = Edge_and_Plane(path, edge_k=edge_k, plane_overlap=plane_overlap, edge_thresh=edge_thresh, plane_thresh=plane_thresh, min_planesize=min_planesize)
     xyz = np.loadtxt(path)[:,0:3]
     PC_variables = np.hstack((edge, plane, curvature, linearity, planarity, sphericity, omnivaraiance, eigentropy, anisotropy, eigensum))
-    __, grad_dist, __ = get_nn_data(xyz, k, 5)
+    __, grad_dist, __ = get_nn_data(xyz, k, k)
     grad_dist = np.mean(grad_dist, axis=1)
 
     if save == "yes":
