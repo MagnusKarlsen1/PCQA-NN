@@ -114,15 +114,15 @@ def Create_geometry(shape: str, output_path: str, params: dict):
     if shape == "ball":
         part_path = os.path.join(BASE_DIR, "Ball", "Ball.SLDPRT")
         params_file = os.path.join(BASE_DIR, "Ball", "parameters.txt")
-    elif shape == "saddle":
-        part_path = os.path.join(BASE_DIR, "Saddle", "Saddle.SLDPRT")
-        params_file = os.path.join(BASE_DIR, "Saddle", "parameters.txt")
+    # elif shape == "saddle":
+    #     part_path = os.path.join(BASE_DIR, "Saddle", "Saddle.SLDPRT")
+    #     params_file = os.path.join(BASE_DIR, "Saddle", "parameters.txt")
     elif shape == "box":
         part_path = os.path.join(BASE_DIR, "Edge", "Box.SLDPRT")
         params_file = os.path.join(BASE_DIR, "Edge", "parameters.txt")
-    elif shape == "curve":
-        part_path = os.path.join(BASE_DIR, "Curved surface", "Curved_surface.SLDPRT")
-        params_file = os.path.join(BASE_DIR, "Curved surface", "parameters.txt")
+    # elif shape == "curve":
+    #     part_path = os.path.join(BASE_DIR, "Curved surface", "Curved_surface.SLDPRT")
+    #     params_file = os.path.join(BASE_DIR, "Curved surface", "parameters.txt")
     elif shape == "angle_curve":
         part_path = os.path.join(BASE_DIR, "Angle_curve", "angle_curve.SLDPRT")
         params_file = os.path.join(BASE_DIR, "Angle_curve", "equations.txt")

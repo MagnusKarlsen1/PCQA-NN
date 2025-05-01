@@ -148,6 +148,9 @@ def main(neighborhood_size, params, shape = "angle_curve", mesh_size = 1, noise 
     
     ###############################################    
     features_array = np.array(features_list)
+    print(features_array.shape)
+    
+    
     all_radius = np.array(radius_list)
     
     new_radius = np.average(all_radius)

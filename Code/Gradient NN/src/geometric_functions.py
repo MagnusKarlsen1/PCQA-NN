@@ -274,7 +274,7 @@ def Edge_and_Plane(path, edge_k = 10, plane_overlap = 6, edge_thresh = 0.06, pla
     planes = np.zeros_like(x)
     planes[plane_index,0] = 1
     return edges, planes
-
+    
 
 def Scalar_fields(path, k = 50):
     df = pd.read_csv(path, sep=" ", usecols=[0, 1, 2], names=["x", "y", "z"])
@@ -320,11 +320,11 @@ def Get_variables(path, k=50, edge_k=10, edge_thresh=0.06, plane_thresh=0.001, p
     curvature, linearity, planarity, sphericity, omnivaraiance, eigentropy, anisotropy, eigensum = Scalar_fields(path, k=k)
     edge, plane = Edge_and_Plane(path, edge_k=edge_k, plane_overlap=plane_overlap, edge_thresh=edge_thresh, plane_thresh=plane_thresh, min_planesize=min_planesize)
     xyz = np.loadtxt(path)[:,0:3]
-
+    PC_variables = np.hstack((edge, plane, curvature, linearity, planarity, sphericity, omnivaraiance, eigentropy, anisotropy, eigensum))
     if save == "yes":
         BASE_DIR = os.path.dirname(os.path.abspath(__file__))
         save_path = os.path.join(BASE_DIR, "Pointcloud_Data", "PC_variables.xyz")
-        PC_variables = np.hstack((xyz, edge, plane, curvature, linearity, planarity, sphericity, omnivaraiance, eigentropy, anisotropy, eigensum))
+        PC_variables = np.hstack((edge, plane, curvature, linearity, planarity, sphericity, omnivaraiance, eigentropy, anisotropy, eigensum))
         np.savetxt(save_path, PC_variables, fmt="%.6f", delimiter=" ")
 
     if plot == "yes":
@@ -450,4 +450,4 @@ def Get_variables(path, k=50, edge_k=10, edge_thresh=0.06, plane_thresh=0.001, p
 
         plt.show()
     
-    return [edge, plane, curvature, linearity, planarity, sphericity, omnivaraiance, eigentropy, anisotropy, eigensum]
+    return PC_variables
