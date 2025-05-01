@@ -320,6 +320,8 @@ def Get_variables(path, k=50, edge_k=10, edge_thresh=0.06, plane_thresh=0.001, p
     curvature, linearity, planarity, sphericity, omnivaraiance, eigentropy, anisotropy, eigensum = Scalar_fields(path, k=k)
     edge, plane = Edge_and_Plane(path, edge_k=edge_k, plane_overlap=plane_overlap, edge_thresh=edge_thresh, plane_thresh=plane_thresh, min_planesize=min_planesize)
     xyz = np.loadtxt(path)[:,0:3]
+    __, grad_dist, __ = get_nn_data(xyz, k, 5)
+    grad_dist = np.mean(grad_dist, axis=1)
 
     if save == "yes":
         BASE_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -328,6 +330,18 @@ def Get_variables(path, k=50, edge_k=10, edge_thresh=0.06, plane_thresh=0.001, p
         np.savetxt(save_path, PC_variables, fmt="%.6f", delimiter=" ")
 
     if plot == "yes":
+
+        # gradident differnce mean
+        fig = plt.figure()
+        ax = fig.add_subplot(111, projection='3d')
+
+        scatter = ax.scatter(xyz[:, 0], xyz[:, 1], xyz[:, 2],
+                            c=grad_dist, cmap='viridis')
+
+        fig.colorbar(scatter, ax=ax, label='gradident differnce mean')
+
+        plt.show()        
+
         # edge
         fig = plt.figure()
         ax = fig.add_subplot(111, projection='3d')
