@@ -1,5 +1,6 @@
 import sys
 import os
+import jax
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 DRAWINGS_PATH = os.path.abspath(os.path.join(BASE_DIR, "../../../Drawings"))
 sys.path.append(DRAWINGS_PATH)
