@@ -220,7 +220,7 @@ def calculate_ball_density(radius: float, points_inside_ball):
 def min_max_scale(array):
     return (array - np.min(array)) / (np.max(array) - np.min(array))
 
-def Edge_and_Plane(path, edge_k = 10, plane_overlap = 6, edge_thresh = 0.06, plane_thresh = 0.0001, plane_deviation = 0.0001, min_planesize = 20):
+def Edge_and_Plane(path, edge_k = 10, plane_overlap = 6, edge_thresh = 0.06, plane_thresh = 0.001, plane_deviation = 0.0001, min_planesize = 20):
     # Load the XYZ file as a DataFrame
     df = pd.read_csv(path, sep=" ", usecols=[0, 1, 2], names=["x", "y", "z"])
     df["row_index"] = df.index
@@ -270,7 +270,7 @@ def Edge_and_Plane(path, edge_k = 10, plane_overlap = 6, edge_thresh = 0.06, pla
     edges = np.zeros_like(x)
     edges[edge_index,0] = 1
 
-    plane_index = np.where(((plane_count == 1) | (omnivaraiance <= plane_thresh*np.mean(L2norm_nbh(pc_array[nbh_origin,:],5)))) & (edges[:,0] != 1))[0]
+    plane_index = np.where(((plane_count == 1) | (omnivaraiance <= plane_thresh * np.mean(L2norm_nbh(pc_array[nbh_origin,:],5))**2)) & (edges[:,0] != 1))[0]
     planes = np.zeros_like(x)
     planes[plane_index,0] = 1
     return edges, planes
@@ -319,7 +319,7 @@ def Scalar_fields(path, k = 50):
 
     return curvature, linearity, planarity, sphericity, omnivaraiance, eigentropy, anisotropy, eigensum, nbh_curv
 
-def Get_variables(path, k=50, edge_k=10, edge_thresh=0.06, plane_thresh=0.0001, plane_overlap=6, min_planesize=20, plot="No", save="yes"):
+def Get_variables(path, k=50, edge_k=10, edge_thresh=0.06, plane_thresh=0.001, plane_overlap=6, min_planesize=20, plot="No", save="yes"):
     curvature, linearity, planarity, sphericity, omnivaraiance, eigentropy, anisotropy, eigensum, nbh_curv = Scalar_fields(path, k=k)
     edge, plane = Edge_and_Plane(path, edge_k=edge_k, plane_overlap=plane_overlap, edge_thresh=edge_thresh, plane_thresh=plane_thresh, min_planesize=min_planesize)
     xyz = np.loadtxt(path)[:,0:3]
