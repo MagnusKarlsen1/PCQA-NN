@@ -220,7 +220,7 @@ def calculate_ball_density(radius: float, points_inside_ball):
 def min_max_scale(array):
     return (array - np.min(array)) / (np.max(array) - np.min(array))
 
-def Edge_and_Plane(path, edge_k = 10, plane_overlap = 6, edge_thresh = 0.06, plane_thresh = 0.001, plane_deviation = 0.0001, min_planesize = 20):
+def Edge_and_Plane(path, edge_k = 10, plane_overlap = 6, edge_thresh = 0.06, plane_thresh = 0.0001, plane_deviation = 0.0001, min_planesize = 20):
     # Load the XYZ file as a DataFrame
     df = pd.read_csv(path, sep=" ", usecols=[0, 1, 2], names=["x", "y", "z"])
     df["row_index"] = df.index
@@ -270,7 +270,7 @@ def Edge_and_Plane(path, edge_k = 10, plane_overlap = 6, edge_thresh = 0.06, pla
     edges = np.zeros_like(x)
     edges[edge_index,0] = 1
 
-    plane_index = np.where(((plane_count == 1) | (omnivaraiance <= plane_thresh)) & (edges[:,0] != 1))[0]
+    plane_index = np.where(((plane_count == 1) | (omnivaraiance <= plane_thresh*np.mean(L2norm_nbh(pc_array[nbh_origin,:],5)))) & (edges[:,0] != 1))[0]
     planes = np.zeros_like(x)
     planes[plane_index,0] = 1
     return edges, planes
