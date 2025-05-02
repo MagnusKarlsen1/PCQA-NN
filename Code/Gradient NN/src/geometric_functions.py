@@ -305,6 +305,9 @@ def Scalar_fields(path, k = 50):
     omnivarfield = pc.add_scalar_field("omnivariance", ev = eigenField)
     omnivaraiance = pc.points['omnivariance('+str(k+1)+')'].values.reshape(-1,1)
 
+    nbh_origin = np.hstack((pc.points['row_index'].values.reshape(-1,1), nbh_curv))
+    omnivaraiance = omnivaraiance / np.mean(L2norm_nbh(pc_array[nbh_origin,:],5))**2
+
     eigentropyfield = pc.add_scalar_field("eigenentropy", ev = eigenField)
     eigentropy = pc.points['eigenentropy('+str(k+1)+')'].values.reshape(-1,1)
 
@@ -316,7 +319,7 @@ def Scalar_fields(path, k = 50):
 
     return curvature, linearity, planarity, sphericity, omnivaraiance, eigentropy, anisotropy, eigensum, nbh_curv
 
-def Get_variables(path, k=50, edge_k=10, edge_thresh=0.06, plane_thresh=0.001, plane_overlap=6, min_planesize=20, plot="No", save="yes"):
+def Get_variables(path, k=50, edge_k=10, edge_thresh=0.06, plane_thresh=0.0001, plane_overlap=6, min_planesize=20, plot="No", save="yes"):
     curvature, linearity, planarity, sphericity, omnivaraiance, eigentropy, anisotropy, eigensum, nbh_curv = Scalar_fields(path, k=k)
     edge, plane = Edge_and_Plane(path, edge_k=edge_k, plane_overlap=plane_overlap, edge_thresh=edge_thresh, plane_thresh=plane_thresh, min_planesize=min_planesize)
     xyz = np.loadtxt(path)[:,0:3]
