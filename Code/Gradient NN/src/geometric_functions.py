@@ -314,13 +314,15 @@ def Scalar_fields(path, k = 50):
     eigensum_field = pc.add_scalar_field("eigen_sum", ev = eigenField)
     eigensum = pc.points['eigen_sum('+str(k+1)+')'].values.reshape(-1,1)
 
-    return curvature, linearity, planarity, sphericity, omnivaraiance, eigentropy, anisotropy, eigensum
+    return curvature, linearity, planarity, sphericity, omnivaraiance, eigentropy, anisotropy, eigensum, nbh_curv
 
 def Get_variables(path, k=50, edge_k=10, edge_thresh=0.06, plane_thresh=0.001, plane_overlap=6, min_planesize=20, plot="No", save="yes"):
-    curvature, linearity, planarity, sphericity, omnivaraiance, eigentropy, anisotropy, eigensum = Scalar_fields(path, k=k)
+    curvature, linearity, planarity, sphericity, omnivaraiance, eigentropy, anisotropy, eigensum, nbh_curv = Scalar_fields(path, k=k)
     edge, plane = Edge_and_Plane(path, edge_k=edge_k, plane_overlap=plane_overlap, edge_thresh=edge_thresh, plane_thresh=plane_thresh, min_planesize=min_planesize)
     xyz = np.loadtxt(path)[:,0:3]
-    PC_variables = np.hstack((edge, plane, curvature, linearity, planarity, sphericity, omnivaraiance, eigentropy, anisotropy, eigensum))
+    edge_mean = np.mean(np.hstack((edge, edge[nbh_curv,0])), axis=1).reshape(-1,1)
+    plane_mean = np.mean(np.hstack((plane, plane[nbh_curv,0])), axis=1).reshape(-1,1)
+    PC_variables = np.hstack((edge_mean, plane_mean, curvature, linearity, planarity, sphericity, omnivaraiance, eigentropy, anisotropy, eigensum, edge, plane))
     __, grad_dist, __ = get_nn_data(xyz, k, k)
     grad_dist = np.mean(grad_dist, axis=1)
 
@@ -332,7 +334,7 @@ def Get_variables(path, k=50, edge_k=10, edge_thresh=0.06, plane_thresh=0.001, p
 
     if plot == "yes":
 
-        # gradident differnce mean
+        # gradident differnce mean over nbh
         fig = plt.figure()
         ax = fig.add_subplot(111, projection='3d')
 
@@ -343,25 +345,25 @@ def Get_variables(path, k=50, edge_k=10, edge_thresh=0.06, plane_thresh=0.001, p
 
         plt.show()        
 
-        # edge
+        # edge mean over nbh
         fig = plt.figure()
         ax = fig.add_subplot(111, projection='3d')
 
         scatter = ax.scatter(xyz[:, 0], xyz[:, 1], xyz[:, 2],
-                            c=edge, cmap='viridis')
+                            c=edge_mean, cmap='viridis')
 
-        fig.colorbar(scatter, ax=ax, label='edge')
+        fig.colorbar(scatter, ax=ax, label='edge mean')
 
         plt.show()
 
-        # plane
+        # plane mean over nbh
         fig = plt.figure()
         ax = fig.add_subplot(111, projection='3d')
 
         scatter = ax.scatter(xyz[:, 0], xyz[:, 1], xyz[:, 2],
-                            c=plane, cmap='viridis')
+                            c=plane_mean, cmap='viridis')
 
-        fig.colorbar(scatter, ax=ax, label='Plane')
+        fig.colorbar(scatter, ax=ax, label='Plane mean')
 
         plt.show()
 
@@ -462,6 +464,28 @@ def Get_variables(path, k=50, edge_k=10, edge_thresh=0.06, plane_thresh=0.001, p
                             c=eigensum, cmap='viridis')
 
         fig.colorbar(scatter, ax=ax, label='Eigensum')
+
+        plt.show()
+
+        # edge
+        fig = plt.figure()
+        ax = fig.add_subplot(111, projection='3d')
+
+        scatter = ax.scatter(xyz[:, 0], xyz[:, 1], xyz[:, 2],
+                            c=edge, cmap='viridis')
+
+        fig.colorbar(scatter, ax=ax, label='edge')
+
+        plt.show()
+
+        # plane
+        fig = plt.figure()
+        ax = fig.add_subplot(111, projection='3d')
+
+        scatter = ax.scatter(xyz[:, 0], xyz[:, 1], xyz[:, 2],
+                            c=plane, cmap='viridis')
+
+        fig.colorbar(scatter, ax=ax, label='Plane')
 
         plt.show()
     
