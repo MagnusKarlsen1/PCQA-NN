@@ -308,8 +308,8 @@ def Scalar_fields(path, k = 50):
     nbh_origin = np.hstack((pc.points['row_index'].values.reshape(-1,1), nbh_curv))
     omnivaraiance = omnivaraiance / np.mean(L2norm_nbh(pc_array[nbh_origin,:],5))**2
 
-    eigentropyfield = pc.add_scalar_field("eigenentropy", ev = eigenField)
-    eigentropy = pc.points['eigenentropy('+str(k+1)+')'].values.reshape(-1,1)
+#    eigentropyfield = pc.add_scalar_field("eigenentropy", ev = eigenField)
+#    eigentropy = pc.points['eigenentropy('+str(k+1)+')'].values.reshape(-1,1)
 
     anisofield = pc.add_scalar_field("anisotropy", ev = eigenField)
     anisotropy = pc.points['anisotropy('+str(k+1)+')'].values.reshape(-1,1)
@@ -317,10 +317,10 @@ def Scalar_fields(path, k = 50):
     eigensum_field = pc.add_scalar_field("eigen_sum", ev = eigenField)
     eigensum = pc.points['eigen_sum('+str(k+1)+')'].values.reshape(-1,1)
 
-    return curvature, linearity, planarity, sphericity, omnivaraiance, eigentropy, anisotropy, eigensum, nbh_curv
+    return curvature, linearity, planarity, sphericity, omnivaraiance, anisotropy, eigensum, nbh_curv
 
 def Get_variables(path, k=50, edge_k=10, edge_thresh=0.06, plane_thresh=0.001, plane_overlap=6, min_planesize=20, plot="No", save="yes"):
-    curvature, linearity, planarity, sphericity, omnivaraiance, eigentropy, anisotropy, eigensum, nbh_curv = Scalar_fields(path, k=k)
+    curvature, linearity, planarity, sphericity, omnivaraiance, anisotropy, eigensum, nbh_curv = Scalar_fields(path, k=k)
     edge, plane = Edge_and_Plane(path, edge_k=edge_k, plane_overlap=plane_overlap, edge_thresh=edge_thresh, plane_thresh=plane_thresh, min_planesize=min_planesize)
     xyz = np.loadtxt(path)[:,0:3]
     edge_mean = np.mean(np.hstack((edge, edge[nbh_curv,0])), axis=1).reshape(-1,1)
@@ -329,7 +329,7 @@ def Get_variables(path, k=50, edge_k=10, edge_thresh=0.06, plane_thresh=0.001, p
     __, grad_dist, __ = get_nn_data(xyz, k, k)
     grad_dist = np.mean(grad_dist, axis=1)
 
-    PC_variables = np.hstack((edge_mean, plane_mean, curvature, linearity, planarity, omnivaraiance, eigentropy, eigensum))
+    PC_variables = np.hstack((edge_mean, plane_mean, curvature, linearity, planarity, omnivaraiance, eigensum))
     print(PC_variables.shape)
     if save == "yes":
         BASE_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -433,18 +433,18 @@ def Get_variables(path, k=50, edge_k=10, edge_thresh=0.06, plane_thresh=0.001, p
 
         plt.show()
 
-        #Eigentropy
-        fig = plt.figure()
-        ax = fig.add_subplot(111, projection='3d')
+        ##Eigentropy
+        #fig = plt.figure()
+        #ax = fig.add_subplot(111, projection='3d')
 
-        xyz = np.loadtxt(path)
+        #xyz = np.loadtxt(path)
 
-        scatter = ax.scatter(xyz[:, 0], xyz[:, 1], xyz[:, 2],
-                            c=eigentropy, cmap='viridis')
+        #scatter = ax.scatter(xyz[:, 0], xyz[:, 1], xyz[:, 2],
+        #                    c=eigentropy, cmap='viridis')
 
-        fig.colorbar(scatter, ax=ax, label='Eigentropy')
+        #fig.colorbar(scatter, ax=ax, label='Eigentropy')
 
-        plt.show()
+        #plt.show()
 
         #Anisotropy
         fig = plt.figure()

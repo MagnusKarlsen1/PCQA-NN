@@ -8,6 +8,6 @@ sys.path.append(GRADIENT_NN_SRC)
 
 import geometric_functions as gf
 
-path = "C:/Users/aagaa/OneDrive - Aarhus universitet/Dokumenter/GitHub/R-D/Code/Leihui Code/dataset/SelfGeneratedClouds/worm_shaft.xyz"
-path = "C:/Users/aagaa/OneDrive - Aarhus universitet/Dokumenter/GitHub/R-D/Code/Leihui Code/dataset/scanning_repository/bunny.xyz"
+#path = "C:/Users/aagaa/OneDrive - Aarhus universitet/Dokumenter/GitHub/R-D/Code/Leihui Code/dataset/SelfGeneratedClouds/worm_shaft.xyz"
+path = "C:/Users/aagaa/OneDrive - Aarhus universitet/Dokumenter/GitHub/R-D/Drawings/STL/test.xyz"
 gf.Get_variables(path, k=50,plot="yes", save="no", edge_k=10,edge_thresh=0.06)
