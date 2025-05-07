@@ -20,28 +20,35 @@ from pcdiff import knn_graph
 
 
 
-@jit
-def get_radius(neighborhood_points, index_point):   
-    distances = neighborhood_points - index_point
-    diff = jnp.linalg.norm(distances, axis = -1)
-    radius = jnp.max(diff)
-    return radius
+# @jit
+# def get_radius(neighborhood_points, index_point):   
+#     distances = neighborhood_points - index_point
+#     diff = jnp.linalg.norm(distances, axis = -1)
+#     radius = jnp.max(diff)
+#     return radius
+
+
+
+def get_features(index, pointcloud, neighborhood_size):
+
+    # Find the neighbors to index
+    pointcloud_center = pointcloud[index]
+    diffs = pointcloud - pointcloud_center
+    dists = jnp.linalg.norm(diffs, axis=-1)
+
+    # Sort neighbors by distance
+    sorted_indices = jnp.argsort(dists)
+    neighborhood_indices = sorted_indices[1:neighborhood_size+1]
+
+    neighborhood = pointcloud[neighborhood_indices]
     
+    # Get distances to k neighbors
+    neighborhood_distances = dists[neighborhood_indices]
+    radius = jnp.max(neighborhood_distances)
 
-@jit
-def get_features():
+    features = compute_geometric_properties(neighborhood)
 
-
-
-    return
-
-
-
-
-
-
-
-
+    return features, radius
 
 
 @jit
@@ -68,7 +75,6 @@ def compute_geometric_properties(neighborhood):
     
     # Return the properties as a JAX array for faster computations later
     return jnp.array([curvature, linearity, planarity]), eigenvectors, eigenvalues
-
 
 
 
