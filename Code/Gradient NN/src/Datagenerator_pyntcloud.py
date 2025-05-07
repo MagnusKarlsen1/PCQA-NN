@@ -84,11 +84,7 @@ def main(neighborhood_size, params, shape = "angle_curve", mesh_size = 1, noise 
     surface_density = gf.calculate_point_density(area, pointcloud)
     radius_list = []
     
-    # Calculate gradients
-    _, gradients, curvature_ours = gf.get_nn_data(pointcloud, neighborhood_size, neighborhood_size)
-    
-    gradients = np.mean(gradients, axis=1, keepdims=True)
-    
+   
     
     features_list = []
     
@@ -103,7 +99,7 @@ def main(neighborhood_size, params, shape = "angle_curve", mesh_size = 1, noise 
         volume_density = gf.calculate_ball_density(radius, points_inside_ball)
         
         radius_list.append(radius)
- 
+    
     all_radius = np.array(radius_list)
     
     new_radius = np.average(all_radius)
@@ -130,13 +126,14 @@ def main(neighborhood_size, params, shape = "angle_curve", mesh_size = 1, noise 
     
     labels = np.array(label)
     
-    feature_array = gf.Get_variables(output_path_xyz, neighborhood_size, save="No")
+    feature_array, grad_dist = gf.Get_variables(output_path_xyz, neighborhood_size, save="No")
     
     
-    all_features = np.hstack((feature_array, gradients, radius_array))
+    
+    all_features = np.hstack((feature_array, grad_dist.reshape(-1,1), radius_array))
     # print(feature_array.shape)
     
-    
+    print(f"her {all_features.shape}")
     
     return all_features, pointcloud, labels
 

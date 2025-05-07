@@ -231,9 +231,9 @@ if __name__ == "__main__":
     params_ball = {"radius": 10}
 
     params = {"angle": 150,
-              "thicknes": 20,
-              "diameter": 10}
-    main(20, params=params, shape="angle_curve", holes=False)
+              "thicknes": 100,
+              "diameter": 20}
+    main(20, params=params, mesh_size=0.5, shape="angle_curve", holes=False)
 
 
 

@@ -325,14 +325,16 @@ def Get_variables(path, k=50, edge_k=10, edge_thresh=0.06, plane_thresh=0.001, p
     xyz = np.loadtxt(path)[:,0:3]
     edge_mean = np.mean(np.hstack((edge, edge[nbh_curv,0])), axis=1).reshape(-1,1)
     plane_mean = np.mean(np.hstack((plane, plane[nbh_curv,0])), axis=1).reshape(-1,1)
-    PC_variables = np.hstack((edge_mean, plane_mean, curvature, linearity, planarity, sphericity, omnivaraiance, eigentropy, anisotropy, eigensum, edge, plane))
+    
     __, grad_dist, __ = get_nn_data(xyz, k, k)
     grad_dist = np.mean(grad_dist, axis=1)
 
+    PC_variables = np.hstack((edge_mean, plane_mean, curvature, linearity, planarity, omnivaraiance, eigentropy, eigensum))
+    print(PC_variables.shape)
     if save == "yes":
         BASE_DIR = os.path.dirname(os.path.abspath(__file__))
         save_path = os.path.join(BASE_DIR, "Pointcloud_Data", "PC_variables.xyz")
-        PC_variables = np.hstack((edge, plane, curvature, linearity, planarity, sphericity, omnivaraiance, eigentropy, anisotropy, eigensum))
+        # PC_variables = np.hstack((edge, plane, curvature, linearity, planarity, sphericity, omnivaraiance, eigentropy, anisotropy, eigensum))
         np.savetxt(save_path, PC_variables, fmt="%.6f", delimiter=" ")
 
     if plot == "yes":
@@ -492,4 +494,4 @@ def Get_variables(path, k=50, edge_k=10, edge_thresh=0.06, plane_thresh=0.001, p
 
         plt.show()
     
-    return PC_variables
+    return PC_variables, grad_dist
