@@ -14,7 +14,7 @@ from jax import jit, vmap
 import torch
 from scipy.spatial import cKDTree
 from scipy.spatial import KDTree
-
+import importlib
 import random
 import numpy.linalg as LA
 import os
@@ -33,6 +33,9 @@ import meshlab_functions as mf
 import solidworks_functions as sf
 import geometric_functions as gf
 
+importlib.reload(mf)
+importlib.reload(gf)
+importlib.reload(sf)
 ############################
 
 
@@ -86,11 +89,11 @@ def main(neighborhood_size, params, shape = "angle_curve", mesh_size = 1, noise 
     radius_list = []
     
     # Calculate gradients
-    _, gradients, curvature_ours = gf.get_nn_data(pointcloud, neighborhood_size, 2)
+    _, gradients, curvature_ours = gf.get_nn_data(pointcloud, neighborhood_size, neighborhood_size)
     
-    # Find edges 
-    
-        
+    gradients = np.mean(gradients, axis=1, keepdims=True)
+    print(f"Gradients array: {gradients.shape}")
+
     # Find neighbors
     
     kdtree = KDTree(pointcloud)
@@ -111,16 +114,15 @@ def main(neighborhood_size, params, shape = "angle_curve", mesh_size = 1, noise 
         
         
         # Get gradient vector(s) for the current point
-        grad_vectors = gradients[index]           # shape: (k, 2)
-        grad_flat = grad_vectors.flatten().tolist()
+    
+        
 
         
         # Get curvature value for the current point
         curv_value = curvature_ours[index]
 
         # Combine everything
-        feature_row = features + grad_flat + [curv_value] + [surface_density] + [volume_density]
-        
+        feature_row = features + [curv_value] + [volume_density] 
         features_list.append(feature_row)
     
     
@@ -148,8 +150,7 @@ def main(neighborhood_size, params, shape = "angle_curve", mesh_size = 1, noise 
     
     ###############################################    
     features_array = np.array(features_list)
-    print(features_array.shape)
-    
+    print(f"Feature array: {features_array.shape}")
     
     all_radius = np.array(radius_list)
     
@@ -169,11 +170,12 @@ def main(neighborhood_size, params, shape = "angle_curve", mesh_size = 1, noise 
         # The number of points inside the sphere
         num_points_inside_sphere = len(indices)
         
-        label_row = [num_points_inside_sphere] + [new_radius]
+        label_row = [num_points_inside_sphere]
         
         label.append(label_row)
         
-        
+    radius_array = np.full((len(pointcloud), 1), new_radius)
+    print(f"Radius array: {radius_array.shape}")
     #     quality = num_points_inside_sphere/neighborhood_size
         
     #     # Quality_score.append(quality)
@@ -182,7 +184,7 @@ def main(neighborhood_size, params, shape = "angle_curve", mesh_size = 1, noise 
     #     else:
     #         Quality_score.append(0)
         
-        
+    features_array = np.hstack((features_array, radius_array, gradients))    
         
         
     #     # if num_points_inside_sphere >= neighborhood_size:

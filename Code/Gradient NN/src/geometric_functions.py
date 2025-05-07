@@ -55,7 +55,7 @@ def compute_geometric_properties(neighborhood):
     
     
     # Return the properties as a JAX array for faster computations later
-    return jnp.array([curvature, anisotropy, linearity, planarity, sphericity, variation]), eigenvectors, eigenvalues
+    return jnp.array([curvature, linearity, planarity]), eigenvectors, eigenvalues
 
 
 @jit

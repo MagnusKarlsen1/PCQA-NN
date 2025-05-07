@@ -73,10 +73,11 @@ shape_configs = {
 }
 
 mesh_size = [0.5, 1, 2]
-features_total = []
-labels_total = []
+
 
 def run_batch(neighborhood_size=20):
+    features_total = []
+    labels_total = []
     for shape, param_list in shape_configs.items():
         for param_set in param_list:
             for mesh in mesh_size:
@@ -103,12 +104,12 @@ def run_batch(neighborhood_size=20):
 
 
 
-    header_label =["Label", "Average_radius"]
-    
-    header = ["Eigenvalue_curvature", "anisotropy", "linearity", "planarity", "sphericity", "variation", "grad_x", "grad_y", "mean_curvature", "surface_density", "Volume_Density"]
+    header_label =["Label"]
+
+    header = ["Eigenvalue_curvature", "linearity", "planarity", "mean_curvature", "Volume_Density", "Average_radius", "Gradients"]
     BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-    feature_PATH = os.path.abspath(os.path.join(BASE_DIR, "../Data/Training_data/big_test_features_5.txt"))
-    label_PATH = os.path.abspath(os.path.join(BASE_DIR, "../Data/Training_data/big_test_labels_5.txt"))
+    feature_PATH = os.path.abspath(os.path.join(BASE_DIR, f"../Data/Training_data/big_test_features_{neighborhood_size}.txt"))
+    label_PATH = os.path.abspath(os.path.join(BASE_DIR, f"../Data/Training_data/big_test_labels_{neighborhood_size}.txt"))
     np.savetxt(feature_PATH, features_total_np, delimiter=" ", fmt="%.6f", header=" ".join(header))
     np.savetxt(label_PATH, labels_total_np, delimiter=" ", fmt="%.6f", header=" ".join(header_label))
         
@@ -116,8 +117,8 @@ def run_batch(neighborhood_size=20):
         
         
 if __name__ == "__main__":
-    
-    run_batch(5)
+    for n_size in [5,10,15,20,25,30,35,40,45,50]:
+        run_batch(neighborhood_size=n_size)
 
 
 

@@ -131,15 +131,14 @@ def main(neighborhood_size, params, shape = "angle_curve", mesh_size = 1, noise 
     labels = np.array(label)
     
     feature_array = gf.Get_variables(output_path_xyz, neighborhood_size, save="No")
-    print(feature_array.shape)
     
     
+    all_features = np.hstack((feature_array, gradients, radius_array))
     # print(feature_array.shape)
     
     
     
-    
-    return feature_array, pointcloud, labels
+    return all_features, pointcloud, labels
 
 
 
