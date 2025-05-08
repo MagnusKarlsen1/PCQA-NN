@@ -172,9 +172,7 @@ def get_nn_data(pos, k, comparison_size):
     
     pos_dist = L2norm_nbh(pos[col].reshape(-1, k, 3), comparison_size)
 
-    print(grad_dist.shape)
-    print(pos_dist.shape)
-    print(curv.shape)
+  
 
     return pos_dist, grad_dist, curv
 
@@ -246,9 +244,13 @@ def Edge_and_Plane(path, edge_k = 10, plane_overlap = 6, edge_thresh = 0.06, pla
     nbh_origin = np.hstack((pc.points['row_index'].values.reshape(-1,1), nbh_curv))
     
     plane_deviation = np.mean(L2norm_nbh(pc_array[nbh_origin,:],5)) * plane_deviation
-
+    
     plane_size = min_planesize
 
+    
+    
+    
+    
     while plane_size >= min_planesize:
         plane_field = pc.add_scalar_field("plane_fit", max_dist=plane_deviation, max_iterations=500)
         plane = pc.points['is_plane'].values.reshape(-1,1)
@@ -288,6 +290,17 @@ def Scalar_fields(path, k = 50):
     tree = pc.add_structure("kdtree")
     nbh_curv = pc.get_neighbors(k=k, kdtree=tree)
 
+    #######
+
+    nbh_origin = np.hstack((pc.points['row_index'].values.reshape(-1,1), nbh_curv))
+    points = pc_array[nbh_curv]
+    
+    diff = points[:, -1, :] - points[:, 0, :]
+    radius = np.linalg.norm(diff, axis=1)
+    radius = radius.reshape(-1,1)
+    
+    
+    #########    
     eigenField = pc.add_scalar_field("eigen_values", k_neighbors=nbh_curv)
 
     curvfield = pc.add_scalar_field("curvature", ev = eigenField)
@@ -317,10 +330,10 @@ def Scalar_fields(path, k = 50):
     eigensum_field = pc.add_scalar_field("eigen_sum", ev = eigenField)
     eigensum = pc.points['eigen_sum('+str(k+1)+')'].values.reshape(-1,1)
 
-    return curvature, linearity, planarity, sphericity, omnivaraiance, anisotropy, eigensum, nbh_curv
+    return curvature, linearity, planarity, sphericity, omnivaraiance, anisotropy, eigensum, nbh_curv, radius
 
 def Get_variables(path, k=50, edge_k=10, edge_thresh=0.06, plane_thresh=0.001, plane_overlap=6, min_planesize=20, plot="No", save="yes"):
-    curvature, linearity, planarity, sphericity, omnivaraiance, anisotropy, eigensum, nbh_curv = Scalar_fields(path, k=k)
+    curvature, linearity, planarity, sphericity, omnivaraiance, anisotropy, eigensum, nbh_curv, radius = Scalar_fields(path, k=k)
     edge, plane = Edge_and_Plane(path, edge_k=edge_k, plane_overlap=plane_overlap, edge_thresh=edge_thresh, plane_thresh=plane_thresh, min_planesize=min_planesize)
     xyz = np.loadtxt(path)[:,0:3]
     edge_mean = np.mean(np.hstack((edge, edge[nbh_curv,0])), axis=1).reshape(-1,1)
@@ -330,7 +343,7 @@ def Get_variables(path, k=50, edge_k=10, edge_thresh=0.06, plane_thresh=0.001, p
     grad_dist = np.mean(grad_dist, axis=1)
 
     PC_variables = np.hstack((edge_mean, plane_mean, curvature, linearity, planarity, omnivaraiance, eigensum))
-    print(PC_variables.shape)
+    
     if save == "yes":
         BASE_DIR = os.path.dirname(os.path.abspath(__file__))
         save_path = os.path.join(BASE_DIR, "Pointcloud_Data", "PC_variables.xyz")
@@ -494,4 +507,4 @@ def Get_variables(path, k=50, edge_k=10, edge_thresh=0.06, plane_thresh=0.001, p
 
         plt.show()
     
-    return PC_variables, grad_dist
+    return PC_variables, grad_dist, radius

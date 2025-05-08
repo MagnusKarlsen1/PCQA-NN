@@ -1,7 +1,6 @@
 import numpy as np
 import pandas as pd
 import sys
-import pythoncom
 import argparse
 import pickle
 import jax 
@@ -17,6 +16,8 @@ import numpy.linalg as LA
 import os
 from tqdm import tqdm
 from IPython.display import clear_output
+import time
+
 
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -62,42 +63,41 @@ import jax_functions as jf
     
     
 #     return
+print(jax.devices())
 
+
+
+# Load pointcloud
 pointcloud = np.loadtxt(output_path_point)
-pointloud = jnp.asarray(pointcloud)
-
-print(type(pointcloud))
+pointcloud_np = np.array(pointcloud)  # for KDTree
+pointcloud = jnp.asarray(pointcloud)  # for JAX
 
 neighborhood_size = 20
 
-print("From here :)")
+# Step 1: Build KDTree
+tree = KDTree(pointcloud_np)
+_, neighbor_indices = tree.query(pointcloud_np, k=neighborhood_size + 1)
 
-# Vectorize over all indices
+# Step 2: Prepare indices
+neighbor_indices_jax = jnp.array(neighbor_indices)
+
 point_indices = jnp.arange(len(pointcloud))
 
-features, radii = jax.vmap(lambda idx: jf.get_features(idx, pointcloud, neighborhood_size))(point_indices)
+start = time.time()
 
+# Step 3: Run vmap
+features, radii = vmap(lambda idx: jf.get_features(idx, pointcloud, neighbor_indices_jax))(point_indices)
 
+end = time.time()
+print(f"Time taken: {end - start:.6f} seconds")
 
+# Step 4: Force computation
+features = jax.device_get(features)
+radii = jax.device_get(radii)
 
-print(f"Radius: {radii.shape}, Features: {features.shape}")
+# Step 5: Save
+np.save('output.npy', features)
+np.savetxt('output.txt', np.array(features))
+print("done")
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+print(f"Radius: {radii.shape} features: {features.shape}")

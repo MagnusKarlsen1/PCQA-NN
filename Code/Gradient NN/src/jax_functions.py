@@ -16,7 +16,6 @@ import pandas as pd
 import os
 import sys
 import pdb
-from pcdiff import knn_graph
 
 
 
@@ -29,26 +28,16 @@ from pcdiff import knn_graph
 
 
 
-def get_features(index, pointcloud, neighborhood_size):
+def get_features(index, pointcloud, neighbor_indices):
+    neighborhood_idx = neighbor_indices[index][1:]  # skip self
+    neighborhood = pointcloud[neighborhood_idx]
 
-    # Find the neighbors to index
-    pointcloud_center = pointcloud[index]
-    diffs = pointcloud - pointcloud_center
-    dists = jnp.linalg.norm(diffs, axis=-1)
-
-    # Sort neighbors by distance
-    sorted_indices = jnp.argsort(dists)
-    neighborhood_indices = sorted_indices[1:neighborhood_size+1]
-
-    neighborhood = pointcloud[neighborhood_indices]
-    
-    # Get distances to k neighbors
-    neighborhood_distances = dists[neighborhood_indices]
+    neighborhood_distances = jnp.linalg.norm(neighborhood - pointcloud[index], axis=-1)
     radius = jnp.max(neighborhood_distances)
 
     features = compute_geometric_properties(neighborhood)
-
     return features, radius
+
 
 
 @jit
@@ -71,10 +60,10 @@ def compute_geometric_properties(neighborhood):
     planarity = (eigenvalues[1] - eigenvalues[2]) / eigenvalues[0]
     sphericity = eigenvalues[2] / eigenvalues[0]
     variation = eigenvalues[0] / (eigenvalues[0] + eigenvalues[2])
-    
+    omnivariance = jnp.cbrt((eigenvalues[0]*eigenvalues[1]*eigenvalues[2]))
     
     # Return the properties as a JAX array for faster computations later
-    return jnp.array([curvature, linearity, planarity]), eigenvectors, eigenvalues
+    return jnp.array([curvature, linearity, planarity, omnivariance])
 
 
 

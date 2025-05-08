@@ -82,31 +82,35 @@ def main(neighborhood_size, params, shape = "angle_curve", mesh_size = 1, noise 
     # Calculate point density
     area = sf.get_surface_area(model, "mm2")
     surface_density = gf.calculate_point_density(area, pointcloud)
-    radius_list = []
+    # radius_list = []
     
    
     
-    features_list = []
+    # features_list = []
+    feature_array, grad_dist, radius = gf.Get_variables(output_path_xyz, neighborhood_size, save="No")
     
-    kdtree = KDTree(pointcloud)
     
-    for index in tqdm(range(len(pointcloud)), desc="Processing points"):
     
-        neighborhood, raw_neighborhood, indices, distances = gf.find_neighbors(kdtree, index, pointcloud, neighborhood_size)
+    all_features = np.hstack((feature_array, grad_dist.reshape(-1,1), radius))
+    # kdtree = KDTree(pointcloud)
+    
+    # for index in tqdm(range(len(pointcloud)), desc="Processing points"):
+    
+    #     neighborhood, raw_neighborhood, indices, distances = gf.find_neighbors(kdtree, index, pointcloud, neighborhood_size)
 
 
-        points_inside_ball, radius = gf.points_inside_ball(pointcloud, kdtree, index, distances)
-        volume_density = gf.calculate_ball_density(radius, points_inside_ball)
+    #     points_inside_ball, radius = gf.points_inside_ball(pointcloud, kdtree, index, distances)
+    #     volume_density = gf.calculate_ball_density(radius, points_inside_ball)
         
-        radius_list.append(radius)
+    #     radius_list.append(radius)
     
-    all_radius = np.array(radius_list)
+    # all_radius = np.array(radius_list)
     
-    new_radius = np.average(all_radius)
+    # new_radius = np.average(all_radius)
     
-    radius_array = np.full((len(pointcloud), 1), new_radius)
+    # radius_array = np.full((len(pointcloud), 1), new_radius)
     label = []
-    
+    new_radius = np.average(radius)
     
     tree = cKDTree(pointcloud)
     
@@ -126,14 +130,9 @@ def main(neighborhood_size, params, shape = "angle_curve", mesh_size = 1, noise 
     
     labels = np.array(label)
     
-    feature_array, grad_dist = gf.Get_variables(output_path_xyz, neighborhood_size, save="No")
-    
-    
-    
-    all_features = np.hstack((feature_array, grad_dist.reshape(-1,1), radius_array))
+
     # print(feature_array.shape)
     
-    print(f"her {all_features.shape}")
     
     return all_features, pointcloud, labels
 
