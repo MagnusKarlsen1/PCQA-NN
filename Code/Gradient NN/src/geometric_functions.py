@@ -261,6 +261,8 @@ def Edge_and_Plane(path, edge_k = 10, plane_overlap = 6, edge_thresh = 0.06, pla
             plane_col = np.zeros_like(x)
             plane_col[row_indicies[np.where(plane == 1)[0]]] = 1
             pc_array = np.hstack((pc_array,plane_col))
+            if plane_size >= plane.shape[0]:
+                break
             pc.points = pc.points[pc.points['is_plane'] != 1]
 
     if pc_array.shape[1] == 3:
