@@ -14,14 +14,6 @@ sys.path.append(GRADIENT_NN_SRC)
 
 import geometric_functions as gf
 
-<<<<<<< Updated upstream
-<<<<<<< Updated upstream
-#path = "C:/Users/aagaa/OneDrive - Aarhus universitet/Dokumenter/GitHub/R-D/Code/Leihui Code/dataset/SelfGeneratedClouds/worm_shaft.xyz"
-path = "C:/Users/magnu/OneDrive/Dokumenter/GitHub/R-D/Drawings/STL/test.xyz"
-gf.Get_variables(path, k=50,plot="no", save="no", edge_k=10,edge_thresh=0.06)
-=======
-=======
->>>>>>> Stashed changes
 path = "C:/Users/aagaa/OneDrive - Aarhus universitet/Dokumenter/GitHub/R-D/Code/Leihui Code/dataset/SelfGeneratedClouds/gear_shaft.xyz"
 #path = "C:/Users/aagaa/OneDrive - Aarhus universitet/Dokumenter/GitHub/R-D/Drawings/STL/test.xyz"
 #gf.Get_variables(path, k=50,plot="no", save="no", edge_k=10,edge_thresh=0.06)
@@ -51,9 +43,4 @@ scatter = ax.scatter(xyz[:, 0], xyz[:, 1], xyz[:, 2],
 
 fig.colorbar(scatter, ax=ax, label='R')
 
-<<<<<<< Updated upstream
 plt.show()
->>>>>>> Stashed changes
-=======
-plt.show()
->>>>>>> Stashed changes
