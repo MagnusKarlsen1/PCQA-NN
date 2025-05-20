@@ -29,7 +29,7 @@ import meshlab_functions as mf
 import solidworks_functions as sf
 import geometric_functions as gf
 
-import TwoTimesKNN_dataGen as Generator
+import New_idea as Generator
 
 shape_configs = {
     "ball" : [{"radius": 5},
@@ -75,7 +75,7 @@ shape_configs = {
 mesh_size = [0.5, 1, 2]
 
 
-def run_batch(neighborhood_size=20):
+def run_batch():
     features_total = []
     labels_total = []
     for shape, param_list in shape_configs.items():
@@ -84,7 +84,6 @@ def run_batch(neighborhood_size=20):
                 print(f"🚀 Running: {shape} | params: {param_set} | mesh size: {mesh}")
                 try:
                     features, _, labels = Generator.main(
-                        neighborhood_size,
                         params=param_set,
                         shape=shape,
                         mesh_size=mesh
@@ -104,12 +103,12 @@ def run_batch(neighborhood_size=20):
 
 
 
-    header_label =["Label"]
+    header_label =["Mesh size", "Num_points"]
 
-    header = ["curvature", "anisotropy", "linearity", "planarity", "sphericity", "variation", "curv_value", "volume_density", "surface_density", "grad1", "grad2", "radius"]
+    header = ["curvature", "anisotropy", "linearity", "planarity", "sphericity", "variation", "curv_value", "grad"]
     BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-    feature_PATH = os.path.abspath(os.path.join(BASE_DIR, f"../Data/Training_data/Features_DENNE_{neighborhood_size}.txt"))
-    label_PATH = os.path.abspath(os.path.join(BASE_DIR, f"../Data/Training_data/Labels_DENNE_{neighborhood_size}.txt"))
+    feature_PATH = os.path.abspath(os.path.join(BASE_DIR, f"../Data/Training_data/Features_NY.txt"))
+    label_PATH = os.path.abspath(os.path.join(BASE_DIR, f"../Data/Training_data/Labels_NY.txt"))
     np.savetxt(feature_PATH, features_total_np, delimiter=" ", fmt="%.6f", header=" ".join(header))
     np.savetxt(label_PATH, labels_total_np, delimiter=" ", fmt="%.6f", header=" ".join(header_label))
         
@@ -118,7 +117,7 @@ def run_batch(neighborhood_size=20):
         
 if __name__ == "__main__":
     # for n_size in [5,10,15,20,25,30,35,40,45,50]:
-    run_batch(neighborhood_size=20)
+    run_batch()
 
 
 
