@@ -86,6 +86,10 @@ def main(neighborhood_size, params, shape = "angle_curve", mesh_size = 1, noise 
     # Calculate point density
     area = sf.get_surface_area(model, "mm2")
     surface_density = gf.calculate_point_density(area, pointcloud)
+    surface_density_array = np.full((len(pointcloud), 1), surface_density)
+    
+ 
+    
     radius_list = []
     
     # Calculate gradients
@@ -93,92 +97,46 @@ def main(neighborhood_size, params, shape = "angle_curve", mesh_size = 1, noise 
     
     gradients = np.mean(gradients, axis=1, keepdims=True)
     
-
-    # Find neighbors
-    
-    kdtree = KDTree(pointcloud)
-    
-    for index in tqdm(range(len(pointcloud)), desc="Processing points"):
-    
-        neighborhood, raw_neighborhood, indices, distances = gf.find_neighbors(kdtree, index, pointcloud, neighborhood_size)
-
-        
-        points_inside_ball, radius = gf.points_inside_ball(pointcloud, kdtree, index, distances)
-        volume_density = gf.calculate_ball_density(radius, points_inside_ball)
-        radius_list.append(radius)
-        # Calculate curvature
-        features_jax, _, _ = gf.compute_geometric_properties(neighborhood)
-        features = np.array(features_jax)  # Convert to regular NumPy array
-        features = features.tolist()      # Now it's a list of floats
-        
-        grad_vectors = gradients[index]           # shape: (k, 2)
-        grad_flat = grad_vectors.flatten().tolist()
-        
-        # Get gradient vector(s) for the current point
-    
-        
-
-        
-        # Get curvature value for the current point
-        curv_value = curvature_ours[index]
-
-        # Combine everything
-        feature_row = features + [curv_value] + [volume_density] + [surface_density] + grad_flat
-        features_list.append(feature_row)
-
     
 
-    
-    ############# TEST med curvature ##############
-    
-    # # 1. Take the first two columns of the pointcloud
-    # test = np.array(pointcloud[:, :3])  # shape: (N, 2)
-    # features_array_test = np.array(features_list)
+    pointcloud_jnp = jnp.array(pointcloud)
+    # Step 1: Build KDTree
+    tree = KDTree(pointcloud)
+    _, neighbor_indices = tree.query(pointcloud, k=neighborhood_size + 1)
 
+    # Step 2: Prepare indices
+    neighbor_indices_jax = jnp.array(neighbor_indices)
 
-    # # 2. Get the curvature column (assumes 1D array of shape (N,))
-    # curvature_test = features_array_test[:,0]     # or whatever column index represents curvature
+    point_indices = jnp.arange(len(pointcloud_jnp))
 
-    # # 3. Normalize curvature
-    # # curvature_tester = gf.min_max_scale(curvature_test)
-    # # curvature_tester = curvature_tester.reshape(-1, 1)  # reshape to (N, 1) for hstack
+    
+    
+    features, radii = vmap(lambda idx: gf.get_features(idx, pointcloud_jnp, neighbor_indices_jax))(point_indices)
+    
+    features = jax.device_get(features)
+    radii = jax.device_get(radii)   
+    
+    
+    features_np = np.array(features)
+    radii_np = np.array(radii)
 
-    # # 4. Stack coordinates and normalized curvature
-    # test = np.hstack([test, curvature_test.reshape(-1,1)])  # shape: (N, 3)
-
-    # # 5. Save to file
-    # np.savetxt("./denHER.txt", test, fmt="%.6f", delimiter=" ")
+ 
     
-    
-    ###############################################    
-    features_array = np.array(features_list)
-    
-    
-    all_radius = np.array(radius_list)
-    
-    new_radius = np.average(all_radius)
-    print(type(new_radius))
-    Quality_score = []
+    new_radius = np.average(radii_np)
     label = []
     
-    print(new_radius)
-    
-    tree = cKDTree(pointcloud)
-    
-    
-    for index2 in tqdm(range(len(pointcloud)), desc="Second process"):
-        
-        indices = tree.query_ball_point(pointcloud[index2], new_radius)
 
-        # The number of points inside the sphere
-        num_points_inside_sphere = len(indices)
-        
-        label_row = [num_points_inside_sphere]
-        
-        label.append(label_row)
-        
+    # Build KDTree
+    tree2 = cKDTree(pointcloud)
+
+    # Query all neighbors inside radius at once
+    all_neighbors = tree2.query_ball_point(pointcloud, r=new_radius)
+
+    labels = np.array([len(nbh) for nbh in all_neighbors]).reshape(-1, 1)
+
+ 
     radius_array = np.full((len(pointcloud), 1), new_radius)
-    
+
     #     quality = num_points_inside_sphere/neighborhood_size
         
     #     # Quality_score.append(quality)
@@ -186,19 +144,15 @@ def main(neighborhood_size, params, shape = "angle_curve", mesh_size = 1, noise 
     #         Quality_score.append(1)
     #     else:
     #         Quality_score.append(0)
-    print(f"wtf - før - merge: {features_array.shape}")    
-    features_array = np.hstack((features_array, radius_array))    
-        
+    
+    features_array = np.hstack((features_np, gradients, surface_density_array))    
         
     #     # if num_points_inside_sphere >= neighborhood_size:
     #     #     Quality_score.append(1)
-            # 
+            
     #     # else:
     #     #     Quality_score.append(0)
-    
-    print(f"wtf {features_array.shape}")
-    labels = np.array(label)
-    # Quality_score = np.array(Quality_score)
+
 
     
     
@@ -210,7 +164,8 @@ def main(neighborhood_size, params, shape = "angle_curve", mesh_size = 1, noise 
     # np.savetxt("./labels.txt", labels, , fmt="%.6f", delimiter=" ")
     
     
-   
+    
+    
     
     
     # Calculate edge number based on neighbors
@@ -223,7 +178,8 @@ def main(neighborhood_size, params, shape = "angle_curve", mesh_size = 1, noise 
     # mf.save_neighborhood_to_txt(features_array, output_path_features)
 
     # np.savetxt(output_path_features, features_array, fmt="%.6f", delimiter=" ", header=" ".join(header), comments="")
-    return features_array, pointcloud, labels
+    
+    return features_array, pointcloud, radii_np
 
 
 

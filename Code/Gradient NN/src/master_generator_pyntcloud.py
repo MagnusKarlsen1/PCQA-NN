@@ -117,8 +117,8 @@ def run_batch(neighborhood_size=20):
         
         
 if __name__ == "__main__":
-    for n_size in [5,10,15,20,25,30,35,40,45,50]:
-        run_batch(neighborhood_size=n_size)
+    # for n_size in [5,10,15,20,25,30,35,40,45,50]:
+    run_batch(neighborhood_size=20)
 
 
 

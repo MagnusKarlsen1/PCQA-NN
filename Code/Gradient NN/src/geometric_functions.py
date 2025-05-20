@@ -21,7 +21,7 @@ from pcdiff import knn_graph
 def standardize_patch(pointcloud):
     mean = pointcloud.mean(axis=0)
     centered = pointcloud - mean
-
+    
     pca = PCA(n_components=3)
     aligned = pca.fit_transform(centered)
 
@@ -55,7 +55,7 @@ def compute_geometric_properties(neighborhood):
     
     
     # Return the properties as a JAX array for faster computations later
-    return jnp.array([curvature, linearity, planarity]), eigenvectors, eigenvalues
+    return jnp.array([curvature, anisotropy, linearity, planarity, sphericity, variation]), eigenvectors, eigenvalues
 
 
 @jit
@@ -510,3 +510,82 @@ def Get_variables(path, k=50, edge_k=10, edge_thresh=0.06, plane_thresh=0.001, p
         plt.show()
     
     return PC_variables, grad_dist, radius
+
+
+
+def standardize_patch_jax(neighborhood):
+    mean = jnp.mean(neighborhood, axis=0)
+    centered = neighborhood - mean
+
+    cov_matrix = jnp.cov(centered.T)
+    eigenvalues, eigenvectors = jnp.linalg.eigh(cov_matrix)
+    
+    # Sort eigenvectors by descending eigenvalues
+    idx = jnp.argsort(eigenvalues)[::-1]
+    eigenvectors = eigenvectors[:, idx]
+    
+    # Rotate the centered points
+    aligned = centered @ eigenvectors
+
+    # Normalize to unit sphere safely
+    max_norm = jnp.max(jnp.linalg.norm(aligned, axis=1))
+
+    standardized = jax.lax.cond(
+        max_norm > 0,
+        lambda _: aligned / max_norm,
+        lambda _: aligned,
+        operand=None
+    )
+
+    return standardized
+
+
+
+
+
+def get_features(index, pointcloud, neighbor_indices):
+    neighborhood_idx = neighbor_indices[index][1:]  # skip self
+    neighborhood = pointcloud[neighborhood_idx]
+
+    
+
+    neighborhood_distances = jnp.linalg.norm(neighborhood - pointcloud[index], axis=-1)
+    radius = jnp.max(neighborhood_distances)
+
+    neighborhood = standardize_patch_jax(neighborhood)
+
+    features = compute_geometric_properties2(neighborhood)
+    return features, radius
+
+
+
+@jit
+def compute_geometric_properties2(neighborhood):
+    # Compute the covariance matrix using JAX
+    cov_matrix = jnp.cov(neighborhood.T)
+
+    # Perform PCA (eigenvalue decomposition) using JAX
+    eigenvalues, eigenvectors = jnp.linalg.eigh(cov_matrix)
+    
+    # Sort eigenvalues in descending order
+    sorted_indices = jnp.argsort(eigenvalues)[::-1]
+    eigenvalues = eigenvalues[sorted_indices]
+    eigenvectors = eigenvectors[:, sorted_indices]
+    
+    # Calculate geometric properties based on sorted eigenvalues
+    curvature = eigenvalues[2] / jnp.sum(eigenvalues)
+    anisotropy = (eigenvalues[0] - eigenvalues[2]) / eigenvalues[0]
+    linearity = (eigenvalues[0] - eigenvalues[1]) / eigenvalues[0]
+    planarity = (eigenvalues[1] - eigenvalues[2]) / eigenvalues[0]
+    sphericity = eigenvalues[2] / eigenvalues[0]
+    variation = eigenvalues[0] / (eigenvalues[0] + eigenvalues[2])
+    omnivariance = jnp.cbrt((eigenvalues[0]*eigenvalues[1]*eigenvalues[2]))
+    
+    # Return the properties as a JAX array for faster computations later
+    return jnp.array([curvature, linearity, planarity, omnivariance, anisotropy, sphericity, variation])
+
+
+
+
+
+
