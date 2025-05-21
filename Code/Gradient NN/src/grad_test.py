@@ -14,11 +14,11 @@ sys.path.append(GRADIENT_NN_SRC)
 
 import geometric_functions as gf
 
-#path = "C:/Users/aagaa/OneDrive - Aarhus universitet/Dokumenter/GitHub/R-D/Code/Leihui Code/dataset/SelfGeneratedClouds/gear_shaft.xyz"
-path = "C:/Users/aagaa/OneDrive - Aarhus universitet/Dokumenter/GitHub/R-D/Drawings/STL/test.xyz"
+path = "C:/Users/aagaa/OneDrive - Aarhus universitet/Dokumenter/GitHub/R-D/Code/Leihui Code/dataset/SelfGeneratedClouds/gear_shaft.xyz"
+#path = "C:/Users/aagaa/OneDrive - Aarhus universitet/Dokumenter/GitHub/R-D/Drawings/STL/test.xyz"
 #gf.Get_variables(path, k=50,plot="no", save="no", edge_k=10,edge_thresh=0.06)
 
-k=5
+k=50
 
 xyz = np.loadtxt(path)[:,0:3]
 upper = xyz[np.where(xyz[:,2] <= np.mean(xyz[:,2])),:][0]
