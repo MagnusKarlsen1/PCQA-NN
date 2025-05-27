@@ -43,18 +43,48 @@ def get_eigenfeatures(neighborhood, normalize = False):
     eigensum = eigenvalues[0]+eigenvalues[1]+eigenvalues[2]
     eigentropy = -jnp.sum(eigenvalues * jnp.log(eigenvalues + 1e-10))
     
+    eigenfeatures = [
+    curvature,
+    linearity,
+    planarity,
+    scattering,
+    anisotropy,
+    omnivariance,
+    sphericity,
+    variation,
+    eigensum,
+    eigentropy
+    ]
+    
+    
+    return [float(f) for f in eigenfeatures]
+
+
+def get_density_spatial_features(neighborhood):
+
+
+    distaces = 
     
     
     
-    return eigenfeatures
+    average_distance = jnp.mean(distances)
+    distance_std = jnp.std(distances)
+    
+    
+    
+    
+    
+    return
 
 
 
 
-
-
-
-
+def get_normal_roughness_features():
+    
+    
+    
+    
+    return 
 
 
 
