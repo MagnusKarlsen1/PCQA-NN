@@ -111,3 +111,4 @@ R = np.linalg.norm(xyz - xyz[col.reshape(-1,k)[:,k-1]], axis=1)
 # fig.colorbar(scatter, ax=ax, label='R')
 
 # plt.show()
+#
