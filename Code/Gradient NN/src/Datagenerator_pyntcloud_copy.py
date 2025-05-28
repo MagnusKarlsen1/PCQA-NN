@@ -90,8 +90,19 @@ def main(neighborhood_size, params, shape = "angle_curve", mesh_size = 0.5, nois
     feature_array, grad_dist, radius = gf.Get_variables(output_path_xyz, neighborhood_size, save="No")
     #feature_array, grad_dist, radius = gf.Get_variables(output_path_xyz, neighborhood_size, save="No")
     
+    average_radius = np.mean(radius)
+    average_radius_array = np.full((len(pointcloud), 1), average_radius)
     
-    all_features = np.hstack((feature_array, grad_dist.reshape(-1,1), radius))
+    tree2 = cKDTree(pointcloud)
+
+    # Query all neighbors inside radius at once
+    all_neighbors = tree2.query_ball_point(pointcloud, r=average_radius)
+
+    pointsIN = np.array([len(nbh) for nbh in all_neighbors]).reshape(-1, 1)
+    
+    
+    
+    all_features = np.hstack((feature_array, grad_dist.reshape(-1,1), average_radius_array, pointsIN))
     # kdtree = KDTree(pointcloud)
     
     # for index in tqdm(range(len(pointcloud)), desc="Processing points"):
@@ -143,12 +154,14 @@ def main(neighborhood_size, params, shape = "angle_curve", mesh_size = 0.5, nois
 
 if __name__ == "__main__":
     
-    params_ball = {"radius": 10}
+    params_ball = {"radius": 50}
 
     params = {"angle": 150,
               "thicknes": 20,
               "diameter": 10}
-    features, _, labels = main(20, params=params, shape="angle_curve", holes=False)
+    features, _, labels = main(20, params=params_ball, shape="ball", holes=True)
+
+    # np.savetxt("../Data/Training_data/ball_w_holes", pc, fmt='%.3f', delimiter=' ')
 
     header_label =["Label"]
     header = ["edge_mean", "plane_mean", "curvature", "linearity", "planarity", "omnivaraiance", "eigensum", "grad_dist", "radius"]

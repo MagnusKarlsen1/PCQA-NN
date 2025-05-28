@@ -72,8 +72,8 @@ shape_configs = {
               {"top_height": 160, "width": 160, "bottom_height": 105, "thick": 100}]
 }
 
-mesh_size = [0.5, 1, 2]
 
+mesh_size = [0.5, 1, 2]
 
 def run_batch(neighborhood_size=20):
     features_total = []
@@ -106,10 +106,10 @@ def run_batch(neighborhood_size=20):
 
     header_label =["Label"]
 
-    header = ["edge_mean", "plane_mean", "curvature", "linearity", "planarity", "omnivaraiance", "eigensum", "grad_dist", "radius"]
+    header = ["edge_mean", "plane_mean", "curvature", "linearity", "planarity", "omnivaraiance", "eigensum", "Average_radius", "pointsInside", "grad_dist"]
     BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-    feature_PATH = os.path.abspath(os.path.join(BASE_DIR, f"../Data/Training_data/meshsize_features2.txt"))
-    label_PATH = os.path.abspath(os.path.join(BASE_DIR, f"../Data/Training_data/meshsize_labels2.txt"))
+    feature_PATH = os.path.abspath(os.path.join(BASE_DIR, f"../Data/Training_data/meshsize_features3.txt"))
+    label_PATH = os.path.abspath(os.path.join(BASE_DIR, f"../Data/Training_data/meshsize_labels3.txt"))
     np.savetxt(feature_PATH, features_total_np, delimiter=" ", fmt="%.6f", header=" ".join(header))
     np.savetxt(label_PATH, labels_total_np, delimiter=" ", fmt="%.6f", header=" ".join(header_label))
         

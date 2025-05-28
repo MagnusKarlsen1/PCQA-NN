@@ -38,7 +38,7 @@ features_total = []
 labels_total = []
 pointcloud = []
 
-for meshsize in np.arange(1, 2.1, 0.5):
+for meshsize in np.arange(0.5, 2.1, 0.1):
     mf.sample_stl_by_point_distance(path_stl, store_path, meshsize)
     xyz = np.loadtxt(store_path)[:,0:3]
     sd = gf.calculate_point_density(SfA, xyz)

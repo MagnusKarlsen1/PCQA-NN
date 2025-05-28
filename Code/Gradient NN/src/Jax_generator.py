@@ -122,7 +122,7 @@ def main(neighborhood_size, params, shape = "angle_curve", mesh_size = 1, noise 
 
  
     
-    new_radius = np.average(radii_np)
+    new_radius = np.mean(radii_np)
     label = []
     
 
@@ -132,9 +132,9 @@ def main(neighborhood_size, params, shape = "angle_curve", mesh_size = 1, noise 
     # Query all neighbors inside radius at once
     all_neighbors = tree2.query_ball_point(pointcloud, r=new_radius)
 
-    labels = np.array([len(nbh) for nbh in all_neighbors]).reshape(-1, 1)
+    pointsIN = np.array([len(nbh) for nbh in all_neighbors]).reshape(-1, 1)
 
- 
+    
     radius_array = np.full((len(pointcloud), 1), new_radius)
 
     #     quality = num_points_inside_sphere/neighborhood_size
@@ -145,7 +145,7 @@ def main(neighborhood_size, params, shape = "angle_curve", mesh_size = 1, noise 
     #     else:
     #         Quality_score.append(0)
     
-    features_array = np.hstack((features_np, gradients, surface_density_array))    
+    features_array = np.hstack((features_np, gradients, radius_array, pointsIN))    
         
     #     # if num_points_inside_sphere >= neighborhood_size:
     #     #     Quality_score.append(1)
@@ -193,8 +193,8 @@ if __name__ == "__main__":
     params = {"angle": 150,
               "thicknes": 100,
               "diameter": 20}
-    main(20, params=params, mesh_size=0.5, shape="angle_curve", holes=False)
-
+    features, _, _ = main(20, params=params, mesh_size=0.5, shape="angle_curve", holes=False)
+    print(features)
     
 
 

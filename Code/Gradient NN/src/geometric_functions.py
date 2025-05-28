@@ -6,6 +6,7 @@ from sklearn.decomposition import PCA
 from pcdiff import knn_graph, estimate_basis, build_grad_div, laplacian, coords_projected, gaussian_weights, weighted_least_squares, batch_dot
 import torch
 import jax
+from scipy.spatial import cKDTree
 
 from pyntcloud import PyntCloud 
 import pandas as pd
@@ -344,7 +345,19 @@ def Get_variables(path, k=50, edge_k=10, edge_thresh=0.06, plane_thresh=0.001, p
     __, grad_dist, __ = get_nn_data(xyz, k, k)
     grad_dist = np.mean(grad_dist, axis=1)
 
-    PC_variables = np.hstack((edge_mean, plane_mean, curvature, linearity, planarity, omnivaraiance, eigensum))
+    
+    average_radius = np.mean(radius)
+    average_radius_array = np.full((len(xyz), 1), average_radius)
+    
+    tree2 = cKDTree(xyz)
+
+    # Query all neighbors inside radius at once
+    all_neighbors = tree2.query_ball_point(xyz, r=average_radius)
+
+    pointsIN = np.array([len(nbh) for nbh in all_neighbors]).reshape(-1, 1)
+    
+    PC_variables = np.hstack((edge_mean, plane_mean, curvature, linearity, planarity, omnivaraiance, eigensum, average_radius_array, pointsIN))
+
     
     if save == "yes":
         BASE_DIR = os.path.dirname(os.path.abspath(__file__))

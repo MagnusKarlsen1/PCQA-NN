@@ -106,19 +106,19 @@ def run_batch(neighborhood_size=20):
 
     header_label =["Label"]
 
-    header = ["curvature", "linearity", "planarity", "omnivariance", "anisotropy", "sphericity", "variation", "gradients", "surface_density"]
+    header = ["AverageRadius", "PointsInsideBall"]
     BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-    feature_PATH = os.path.abspath(os.path.join(BASE_DIR, f"../Data/Training_data/ny_ide_feature_{neighborhood_size}.txt"))
-    label_PATH = os.path.abspath(os.path.join(BASE_DIR, f"../Data/Training_data/ny_ide_label_{neighborhood_size}.txt"))
+    feature_PATH = os.path.abspath(os.path.join(BASE_DIR, f"../Data/Training_data/average_and_points_in.txt"))
+    # label_PATH = os.path.abspath(os.path.join(BASE_DIR, f"../Data/Training_data/ny_ide_label_{neighborhood_size}.txt"))
     np.savetxt(feature_PATH, features_total_np, delimiter=" ", fmt="%.6f", header=" ".join(header))
-    np.savetxt(label_PATH, labels_total_np, delimiter=" ", fmt="%.6f", header=" ".join(header_label))
+    # np.savetxt(label_PATH, labels_total_np, delimiter=" ", fmt="%.6f", header=" ".join(header_label))
         
         
         
         
 if __name__ == "__main__":
     # for n_size in [5,10,15,20,25,30,35,40,45,50]:
-    run_batch(neighborhood_size=50)
+    run_batch(neighborhood_size=20)
 
 
 
