@@ -42,6 +42,7 @@ for meshsize in np.arange(0.5, 2.1, 0.1):
     mf.sample_stl_by_point_distance(path_stl, store_path, meshsize)
     xyz = np.loadtxt(store_path)[:,0:3]
     sd = gf.calculate_point_density(SfA, xyz)
+    print(sd)
     feature_array, grad_dist, radius = gf.Get_variables(store_path, 20, save="No", plot="no")
     features = np.hstack((feature_array, grad_dist.reshape(-1,1), radius))
     labels = np.hstack((np.full((len(xyz),1), sd), np.full((len(xyz),1), meshsize)))
@@ -58,7 +59,7 @@ header = ["edge_mean", "plane_mean", "curvature", "linearity", "planarity", "omn
 header_label =["Label"]
 header_pc = ["x", "y", "z"]
 
-np.savetxt(feature_PATH, features_total, delimiter=" ", fmt="%.6f", header=" ".join(header))
-np.savetxt(label_PATH, labels_total, delimiter=" ", fmt="%.6f", header=" ".join(header_label))
-np.savetxt(cloud_PATH, pointcloud, delimiter=" ", fmt="%.6f", header=" ".join(header_pc))
+#np.savetxt(feature_PATH, features_total, delimiter=" ", fmt="%.6f", header=" ".join(header))
+#np.savetxt(label_PATH, labels_total, delimiter=" ", fmt="%.6f", header=" ".join(header_label))
+#np.savetxt(cloud_PATH, pointcloud, delimiter=" ", fmt="%.6f", header=" ".join(header_pc))
 #
