@@ -37,7 +37,7 @@ features_total = []
 labels_total = []
 pointcloud = []
 i=0
-for meshsize in [0.5,1,2]:
+for meshsize in [0.5,0.6,0.7]:
     i=i+1
     mf.sample_stl_by_point_distance(path_stl, store_path, meshsize)
     xyz = np.loadtxt(store_path)[:,0:3]
