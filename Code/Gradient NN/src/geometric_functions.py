@@ -461,18 +461,18 @@ def Get_variables(path, k=50, edge_k=10, edge_thresh=0.06, plane_thresh=0.001, p
 
         plt.show()
 
-        ##Eigentropy
-        #fig = plt.figure()
-        #ax = fig.add_subplot(111, projection='3d')
+        #Eigentropy
+        fig = plt.figure()
+        ax = fig.add_subplot(111, projection='3d')
 
-        #xyz = np.loadtxt(path)
+        xyz = np.loadtxt(path)
 
-        #scatter = ax.scatter(xyz[:, 0], xyz[:, 1], xyz[:, 2],
-        #                    c=eigentropy, cmap='viridis')
+        scatter = ax.scatter(xyz[:, 0], xyz[:, 1], xyz[:, 2],
+                           c=eigentropy, cmap='viridis')
 
-        #fig.colorbar(scatter, ax=ax, label='Eigentropy')
+        fig.colorbar(scatter, ax=ax, label='Eigentropy')
 
-        #plt.show()
+        plt.show()
 
         #Anisotropy
         fig = plt.figure()
@@ -597,8 +597,120 @@ def compute_geometric_properties2(neighborhood):
     # Return the properties as a JAX array for faster computations later
     return jnp.array([curvature, linearity, planarity, omnivariance, anisotropy, sphericity, variation])
 
+def grad_imperfect(pos, edge_index, comparison_size, k):
+    kernel_width=1
+    regularizer=1e-8
+    shape_regularizer=None
+
+    normal, x_basis, y_basis = estimate_basis(pos, edge_index)
+
+    row, col = edge_index
+
+    coords, z_pos = xyz_projected(pos, normal, x_basis, y_basis, edge_index, k)
+
+    dist = LA.norm(pos[col] - pos[row], axis=1)
+    weights = gaussian_weights(dist, k, kernel_width)
+
+    if shape_regularizer is None:
+        wls = weighted_least_squares(coords, weights, k, regularizer)
+    else:
+        wls, wls_shape = weighted_least_squares(coords, weights, k, regularizer, shape_regularizer)
+
+    C = (wls * z_pos).reshape(-1, k, 6).sum(axis=1)
+
+    # df/dx^2 = 2*c3
+    grad_xx = 2 * C[:,3]
+    
+    # df/dxdy = c4
+    grad_xy = C[:,4]
+    
+    # df/dy^2 = 2*c5
+    grad_yy = 2 * C[:,5]
+
+    C = C[row]
+
+    # df/dx = c1 + 2*c3*x + c4*y
+    grad_x = C[:,1] + 2 * C[:,3] * coords[:,0] + C[:,4] * coords[:,1]
+
+    # df/dy = c2 + 2*c5*y + c4*x
+    grad_y = C[:,2] + 2 * C[:,5] * coords[:,1] + C[:,4] * coords[:,0]
+    
+    grad = np.column_stack((grad_x, grad_y))
+
+    grad = grad.reshape(-1, k, 2)
+
+    grad_dist = L2norm_nbh(grad, comparison_size)
+    
+    pos_dist = L2norm_nbh(pos[col].reshape(-1, k, 3), comparison_size)
+
+    return pos_dist, grad_dist
+
+def feature_function(pc_array, pc_full, k = 20, delete_points = 10):
+    df = pd.DataFrame(pc_array, columns=['x', 'y', 'z'])
+    df["row_index"] = df.index
+    pc = PyntCloud(df)
+    k = k-1
+    tree = pc.add_structure("kdtree")
+    nbh = pc.get_neighbors(k=k+delete_points, kdtree=tree)
+    nbh_max = nbh[:,(k+delete_points-1)].reshape(-1,1)
+    nbh = nbh[:,0:(k+delete_points-1)]
+
+    if delete_points == 0:
+        nbh_new = nbh
+    
+    else:
+        # Generate random keys for each element
+        keys = np.random.rand(*nbh.shape)
+
+        # Argsort the keys along each row to shuffle
+        shuffled_nbh = np.take_along_axis(nbh, np.argsort(keys, axis=1), axis=1)
+
+        nbh_new = shuffled_nbh[:,0:(k-1)]
+
+    nbh_new = np.hstack((nbh_new, nbh_max))
+
+    nbh_origin = np.hstack((pc.points['row_index'].values.reshape(-1,1), nbh_new))
+
+    edge_index = (np.repeat(np.arange(pc_array.shape[0]), k+1), nbh_origin.flatten())
+
+    pos_dist, grad_dist = grad_imperfect(pc_array, edge_index, k+1, k+1)
+
+    grad_mean = np.mean(grad_dist, axis=1)
+    radius = np.max(pos_dist, axis=1).reshape(-1,1)
+    average_radius = np.mean(radius)
+    average_radius_array = np.full_like(radius, average_radius)
 
 
+    tree2 = cKDTree(pc_array)
+    tree3 = cKDTree(pc_full)
 
+    # Query all neighbors inside radius at once
+    neighbors = tree2.query_ball_point(pc_array, r=average_radius)
+    neighbors_full = tree2.query_ball_point(pc_full, r=average_radius)
+    
 
+    pointsIN = np.array([len(nbh) for nbh in neighbors]).reshape(-1, 1) * k/(k+delete_points)
+    
+    eigenField = pc.add_scalar_field("eigen_values", k_neighbors=nbh_new)
 
+    curvfield = pc.add_scalar_field("curvature", ev = eigenField)
+    curvature = pc.points['curvature('+str(k+1)+')'].values.reshape(-1,1)
+
+    linfield = pc.add_scalar_field("linearity", ev = eigenField)
+    linearity = pc.points['linearity('+str(k+1)+')'].values.reshape(-1,1)
+
+    planfield = pc.add_scalar_field("planarity", ev = eigenField)
+    planarity = pc.points['planarity('+str(k+1)+')'].values.reshape(-1,1)
+
+    spherefield = pc.add_scalar_field("sphericity", ev = eigenField)
+    sphericity = pc.points['sphericity('+str(k+1)+')'].values.reshape(-1,1)
+
+    omnivarfield = pc.add_scalar_field("omnivariance", ev = eigenField)
+    omnivaraiance = pc.points['omnivariance('+str(k+1)+')'].values.reshape(-1,1)
+
+    eigensum_field = pc.add_scalar_field("eigen_sum", ev = eigenField)
+    eigensum = pc.points['eigen_sum('+str(k+1)+')'].values.reshape(-1,1)
+    
+    features = np.hstack((radius, curvature, linearity, planarity, omnivaraiance, eigensum, grad_mean.reshape(-1,1), average_radius_array, pointsIN))
+
+    return features
