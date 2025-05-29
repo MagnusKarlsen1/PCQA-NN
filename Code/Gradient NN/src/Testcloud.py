@@ -44,7 +44,7 @@ for meshsize in np.arange(0.5, 2.1, 0.1):
     sd = gf.calculate_point_density(SfA, xyz)
     print(sd)
     feature_array, grad_dist, radius = gf.Get_variables(store_path, 20, save="No", plot="no")
-    features = np.hstack((feature_array, grad_dist.reshape(-1,1), radius))
+    features = np.hstack((feature_array, grad_dist.reshape(-1,1)))
     labels = np.hstack((np.full((len(xyz),1), sd), np.full((len(xyz),1), meshsize)))
 
     features_total.append(features)
@@ -55,7 +55,7 @@ features_total = np.vstack(features_total)
 labels_total = np.vstack(labels_total)
 pointcloud = np.vstack(pointcloud)
 
-header = ["edge_mean", "plane_mean", "curvature", "linearity", "planarity", "omnivaraiance", "eigensum", "grad_dist", "radius"]
+header = ["edge_mean", "plane_mean", "curvature", "linearity", "planarity", "omnivaraiance", "eigensum", "AverageRadius", "PointsInside", "grad_dist"]
 header_label =["Label"]
 header_pc = ["x", "y", "z"]
 

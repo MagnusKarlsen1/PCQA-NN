@@ -14,7 +14,7 @@ from jax import jit, vmap
 import torch
 from scipy.spatial import cKDTree
 from scipy.spatial import KDTree
-
+from sklearn.neighbors import NearestNeighbors
 import random
 import numpy.linalg as LA
 import os
@@ -70,13 +70,29 @@ def main(neighborhood_size, params, shape = "angle_curve", mesh_size = 0.5, nois
         
         
         # Create holes
+   # After creating holes
     if holes:
-        num_holes = 1
-        hole_size = 1000
-        
+        num_holes = 2
+        hole_size = 500
         pointcloud = mf.create_mesh_holes(pointcloud, num_holes, hole_size)
         print("Creating holes in pointcloud")
-        
+
+        # Find which points were removed by hole creation
+        pc_full = np.loadtxt(output_path_xyz, usecols=(0, 1, 2))  # Load the original, full cloud
+        full_points_set = set(map(tuple, pc_full))
+        holed_points_set = set(map(tuple, pointcloud))
+        missing_points = np.array(list(full_points_set - holed_points_set))
+
+        # Identify edge points near missing points
+        if len(missing_points) > 0:
+            
+            nn = NearestNeighbors(n_neighbors=10, radius=2.0)
+            nn.fit(pointcloud)
+            neighbor_indices = nn.radius_neighbors(missing_points, radius=2.0, return_distance=False)
+            edge_indices = np.unique(np.concatenate(neighbor_indices))
+            # Save the final point cloud (with holes) to a new file
+    output_path_xyz_holed = os.path.join(BASE_DIR, "..", "Data", "Training_data", "PerPoint_w_holes.xyz")
+    np.savetxt(output_path_xyz_holed, pointcloud, fmt="%.6f")
     # mf.save_neighborhood_to_txt(pointcloud, "./Pre_neighborhood_cloud.txt")    
     
     # Calculate point density
@@ -87,7 +103,7 @@ def main(neighborhood_size, params, shape = "angle_curve", mesh_size = 0.5, nois
    
     
     # features_list = []
-    feature_array, grad_dist, radius = gf.Get_variables(output_path_xyz, neighborhood_size, save="No")
+    feature_array, grad_dist, radius = gf.Get_variables(output_path_xyz_holed, neighborhood_size, save="No")
     #feature_array, grad_dist, radius = gf.Get_variables(output_path_xyz, neighborhood_size, save="No")
     
     average_radius = np.mean(radius)
@@ -102,7 +118,7 @@ def main(neighborhood_size, params, shape = "angle_curve", mesh_size = 0.5, nois
     
     
     
-    all_features = np.hstack((feature_array, grad_dist.reshape(-1,1), average_radius_array, pointsIN))
+    all_features = np.hstack((feature_array, grad_dist.reshape(-1,1)))
     # kdtree = KDTree(pointcloud)
     
     # for index in tqdm(range(len(pointcloud)), desc="Processing points"):
@@ -123,7 +139,9 @@ def main(neighborhood_size, params, shape = "angle_curve", mesh_size = 0.5, nois
     labels = np.hstack((np.full(len(pointcloud), surface_density).reshape(-1,1), np.full(len(pointcloud), mesh_size).reshape(-1,1)))
     # label = []
     # new_radius = np.average(radius)
-    
+    # Reduce label for edge points
+    if holes and len(missing_points) > 0:
+        labels[edge_indices, 0] *= 0.5  # Halve the surface_density for edge points
     # tree = cKDTree(pointcloud)
     
     
@@ -166,8 +184,8 @@ if __name__ == "__main__":
     header_label =["Label"]
     header = ["edge_mean", "plane_mean", "curvature", "linearity", "planarity", "omnivaraiance", "eigensum", "grad_dist", "radius"]
     BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-    feature_PATH = os.path.abspath(os.path.join(BASE_DIR, f"../Data/Training_data/testcloud_feat2.txt"))
-    label_PATH = os.path.abspath(os.path.join(BASE_DIR, f"../Data/Training_data/testcloud_lab2.txt"))
+    feature_PATH = os.path.abspath(os.path.join(BASE_DIR, f"../Data/Training_data/holetest_feat.txt"))
+    label_PATH = os.path.abspath(os.path.join(BASE_DIR, f"../Data/Training_data/holetest_label.txt"))
     np.savetxt(feature_PATH, features, delimiter=" ", fmt="%.6f", header=" ".join(header))
     np.savetxt(label_PATH, labels, delimiter=" ", fmt="%.6f", header=" ".join(header_label))
 

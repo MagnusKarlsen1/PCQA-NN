@@ -19,25 +19,14 @@ sys.path.append(DRAWINGS_PATH)
 import geometric_functions as gf
 import meshlab_functions as mf
 
-<<<<<<< Updated upstream
-<<<<<<< Updated upstream
 path = "C:/Users/magnu/OneDrive/Dokumenter/GitHub/R-D/Code/Leihui Code/dataset/SelfGeneratedClouds/Chain_wheel_05.xyz"
 path_in = "C:/Users/magnu/OneDrive/Dokumenter/GitHub/R-D/Drawings/Chain_whee.STL"
-=======
-=======
->>>>>>> Stashed changes
-path = "C:/Users/aagaa/OneDrive - Aarhus universitet/Dokumenter/GitHub/R-D/Code/Leihui Code/dataset/SelfGeneratedClouds/Chain_wheel1mm.xyz"
-path_in = "C:/Users/aagaa/OneDrive - Aarhus universitet/Dokumenter/GitHub/R-D/Drawings/Chain_whee.STL"
->>>>>>> Stashed changes
 #gf.Get_variables(path, k=50,plot="no", save="no", edge_k=10,edge_thresh=0.06)
 
 
-mf.sample_stl_by_point_distance(path_in, path, 1)
+mf.sample_stl_by_point_distance(path_in, path, 0.5)
 
 xyz = np.loadtxt(path)[:,0:3]
-
-xyz = mf.create_mesh_holes(xyz, 10, 50)
-np.savetxt(path, xyz, fmt="%.6f", delimiter=" ")
 
 feature_array, grad_dist, radius = gf.Get_variables(path, 20, save="No", plot="no")
 features = np.hstack((feature_array, grad_dist.reshape(-1,1)))
@@ -49,18 +38,8 @@ labels = np.full((len(xyz),2), sd)
 header_label =["Label"]
 header = ["edge_mean", "plane_mean", "curvature", "linearity", "planarity", "omnivaraiance", "eigensum", "AverageRadius", "PointsInside", "grad_dist"]
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-<<<<<<< Updated upstream
-<<<<<<< Updated upstream
-feature_PATH = os.path.abspath(os.path.join(BASE_DIR, f"../Data/Training_data/testcloud_feat_05.txt"))
-label_PATH = os.path.abspath(os.path.join(BASE_DIR, f"../Data/Training_data/testcloud_lab_05.txt"))
-=======
-feature_PATH = os.path.abspath(os.path.join(BASE_DIR, f"../Data/Training_data/testcloud_feat.txt"))
-label_PATH = os.path.abspath(os.path.join(BASE_DIR, f"../Data/Training_data/testcloud_lab.txt"))
->>>>>>> Stashed changes
-=======
-feature_PATH = os.path.abspath(os.path.join(BASE_DIR, f"../Data/Training_data/testcloud_feat.txt"))
-label_PATH = os.path.abspath(os.path.join(BASE_DIR, f"../Data/Training_data/testcloud_lab.txt"))
->>>>>>> Stashed changes
+feature_PATH = os.path.abspath(os.path.join(BASE_DIR, f"../Data/Training_data/Chain_whee_features.txt"))
+label_PATH = os.path.abspath(os.path.join(BASE_DIR, f"../Data/Training_data/Chain_whee_labels.txt"))
 np.savetxt(feature_PATH, features, delimiter=" ", fmt="%.6f", header=" ".join(header))
 np.savetxt(label_PATH, labels, delimiter=" ", fmt="%.6f", header=" ".join(header_label))
 k=20
@@ -111,4 +90,3 @@ R = np.linalg.norm(xyz - xyz[col.reshape(-1,k)[:,k-1]], axis=1)
 # fig.colorbar(scatter, ax=ax, label='R')
 
 # plt.show()
-#
