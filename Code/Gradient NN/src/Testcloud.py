@@ -59,7 +59,7 @@ header = ["edge_mean", "plane_mean", "curvature", "linearity", "planarity", "omn
 header_label =["Label"]
 header_pc = ["x", "y", "z"]
 
-#np.savetxt(feature_PATH, features_total, delimiter=" ", fmt="%.6f", header=" ".join(header))
-#np.savetxt(label_PATH, labels_total, delimiter=" ", fmt="%.6f", header=" ".join(header_label))
-#np.savetxt(cloud_PATH, pointcloud, delimiter=" ", fmt="%.6f", header=" ".join(header_pc))
+np.savetxt(feature_PATH, features_total, delimiter=" ", fmt="%.6f", header=" ".join(header))
+np.savetxt(label_PATH, labels_total, delimiter=" ", fmt="%.6f", header=" ".join(header_label))
+np.savetxt(cloud_PATH, pointcloud, delimiter=" ", fmt="%.6f", header=" ".join(header_pc))
 #
