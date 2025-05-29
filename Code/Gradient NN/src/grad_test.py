@@ -38,8 +38,8 @@ labels = np.full((len(xyz),2), sd)
 header_label =["Label"]
 header = ["edge_mean", "plane_mean", "curvature", "linearity", "planarity", "omnivaraiance", "eigensum", "AverageRadius", "PointsInside", "grad_dist"]
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-feature_PATH = os.path.abspath(os.path.join(BASE_DIR, f"../Data/Training_data/testcloud_feat_05.txt"))
-label_PATH = os.path.abspath(os.path.join(BASE_DIR, f"../Data/Training_data/testcloud_lab_05.txt"))
+feature_PATH = os.path.abspath(os.path.join(BASE_DIR, f"../Data/Training_data/Chain_whee_features.txt"))
+label_PATH = os.path.abspath(os.path.join(BASE_DIR, f"../Data/Training_data/Chain_whee_labels.txt"))
 np.savetxt(feature_PATH, features, delimiter=" ", fmt="%.6f", header=" ".join(header))
 np.savetxt(label_PATH, labels, delimiter=" ", fmt="%.6f", header=" ".join(header_label))
 k=20
