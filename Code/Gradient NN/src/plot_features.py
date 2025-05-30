@@ -29,7 +29,8 @@ path = os.path.join(BASE_DIR, "../../../code/Leihui Code/dataset/SelfGeneratedCl
 # label_PATH = os.path.abspath(os.path.join(BASE_DIR, f"../Data/Training_data/Chain_whee_labels.txt"))
 # cloud_PATH = os.path.abspath(os.path.join(BASE_DIR, f"../Data/Training_data/Chain_whee_cloud.txt"))
 
-PC_array, grad, radius, xyz = gf.Get_variables(path,k=20,save="No")
+PC_array, grad, radius = gf.Get_variables(path,k=20,save="No")
+xyz = np.loadtxt(path)[:,0:3]
 
 features = {
     'Curvature': PC_array[:,2],
