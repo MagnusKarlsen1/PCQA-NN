@@ -8,7 +8,7 @@ To ensnure high sensitivity to holes, the fixed-radius approach is preferred. Ho
 The volume density then consists of two features:
 \begin{itemize}
     \item \textbf{Average radius}, equal for all points in a single pointcloud 
-    \item \textbf{Points inside}, varies for every point
+    \item \textbf{Points inside average radius}, varies for every point
 \end{itemize}
 
 \begin{figure}[H]
@@ -21,7 +21,7 @@ The volume density then consists of two features:
 Just as a straight line represents the shortest distance between two points, a planar surface is the minimal-area surface that connects any three points. Consequently, a planar region will generally exhibit lower volume density than a curved surface with the same surface density. However, not all geometric influences on volume density are easily measurable. To account for this, multiple geometric features are incorporated to enable the neural network to learn the underlying patterns that define the local geometry bias.
 For simplicity, geometry features are computed using the k-nearest neighbors algorithm with a neighborhood size of 20. While this differs slightly from the method used for volume density, the use of the same neighborhood size as the average radius minimizes discrepancies between the feature sets. Five eigenvalue-based features and one gradient-based feature were initially selected to represent the geometry bias. 
 
-The eigenvalue-based features and their formulations are shown in Equation~\ref{eq:eigenvalue_features}, computed using the pyntcloud library[REF]. 
+The eigenvalue-based features and their formulations are shown in Equation~\ref{eq:eigenvalue_features}, computed using the \texttt{pyntcloud} library. 
 
 \begin{equation}
 \begin{aligned}
@@ -64,7 +64,7 @@ To compute the gradient difference, the L2 norm was applied to the difference be
 
 The outputs, for all geometry features, are plotted in Figure~\ref{fig:feature_plot}, for a neighborhood size of 20 points. Omnivariance appears to provide the most substantial information about local geometry. However, both omnivariance and eigensum are proportional to the eigenvalues of the covariance matrix, which scale with the square of the local mesh size. As a result, these features outperformed volume density features during training, but lacked sensitivity to holes and gaps in the data. This led to a model which failed to detect simple voids in the point cloud. Consequently, omnivariance and eigensum were excluded from the final feature set.
 
-\begin{figure*}[t]
+\begin{figure*}[h]
     \centering
     \includegraphics[width=\textwidth]{figures/feature_plots_lowQ.png}
     \caption{Geometry bias features}\label{fig:feature_plot}
@@ -80,3 +80,9 @@ The features used for training the final model was.
     \item Planarity
     \item Gradient Difference
 \end{itemize}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.5\textwidth]{figures/correlation_matrix_final_lowQ.png}
+    \caption{Correlation matrix between features}\label{fig:feature_correlation}
+\end{figure}

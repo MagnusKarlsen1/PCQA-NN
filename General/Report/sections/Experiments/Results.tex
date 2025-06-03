@@ -9,14 +9,6 @@ Other methods for calculating local PCQA exist [REF-Leihui], however this is a v
     \label{fig:time}
 \end{figure}
 
-To determine the robustness of the models trained on the two datasets, we use a part that the models haven't seen before which is a chain-wheel, see figure \ref{fig:chain_wheel}. This part will used for all result testing in this section.
-\begin{figure}[htbp]
-    \centering
-    \includegraphics[width=0.3\textwidth]{figures/Chain_whee.PNG}
-    \caption{Chain wheel part used for testing the models.} 
-    \label{fig:chain_wheel}
-\end{figure}
-
 To test the models trained on the two different datasets, the chainwheel was used to generate pointclouds in different mesh sizes to determine the robustness of the models. For the model trained on dataset 1, the predictions are very accurate for a mesh size of 0.5mm and again from meshsizes from 1mm to 2mm. However, mesh sizes between 0.6mm and 1mm gives some wrong predictions so the mean values are much lower than the actual label and the standard deviation is also large, see figure \ref{fig:pred_vs_label_first}.\\
 The model trained on dataset 2 is much more robust, showing good predictions for all mesh sizes from 0.5mm to 2mm, with a very low standard deviation, see figure \ref{fig:pred_vs_label_better}. The variation in predictions also follow the tendency of surface density variation for the different mesh sizes as it naturally does as seen in figure \ref{fig:sd_mesh}. Here the variation of surface density is largest at smaller mesh sizes, and decrease as the mesh size goes up.
 
@@ -33,13 +25,6 @@ The model trained on dataset 2 is much more robust, showing good predictions for
     \caption{Predicted surface densities vs truth label. Model trained on 0.5 to 2.0 mm mesh sizes with 0.1 mm intervals}
     \label{fig:pred_vs_label_better}
 \end{figure}
-
-\begin{figure*}[t]
-    \centering
-    \includegraphics[width=\textwidth]{figures/sd_vs_mesh_lowQ.png}
-    \caption{Variation in surface density for different shapes at different mesh sizes}
-    \label{fig:sd_mesh}
-\end{figure*}
 
 The model should also mark areas where the mesh is incomplete, which simulate missing points that could stem from a incomplete scan of a part. To simulate bad scans holes of different sizes are made in the chain wheel pointcloud and then the quality is predicted. The predictions on these pointclouds shows that the holes are all marked as very low density areas, essentially marking areas where the pointcloud is incomplete, see figure \ref{fig:holes_predict}. The model finds holes as small as 5 points. The model also differentiates between holes that are present in the part and holes that are just from missing points, since the hole that goes through the chain wheel is left as a high density area.
 
