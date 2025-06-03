@@ -15,7 +15,8 @@ python Master_generator.py
 
 This will create **Dataset 1 or 2** depending on the `mesh_size` range set inside the script.
 
-> **Note:** Requires **SolidWorks**.
+
+**Note:** Requires **SolidWorks**.
 
 If you only want to perform feature extraction on an `.xyz` file, use the function:
 
@@ -28,3 +29,7 @@ from the script:
 ```
 geometric_functions.py
 ```
+
+The XGBoost model and FLAX MLP model are available in the Jupyter Notebooks inside the folder `models`.
+
+**Note:** The model isn't saved so a training of the models needs to be done using dataset 2.
