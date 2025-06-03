@@ -1,1 +1,23 @@
 <\subsection{Neaural Network}
+The neural network model is a Multi-Layer Perceptron (MLP) designed to predict the quality of pointclouds based on their extracted features. The architecture consists of an input layer, four hidden layers, and an output layer. The hidden layers have 64, 128, 128, and 64 units, respectively, and use the ReLU activation function to introduce non-linearity. The output layer consists of a single unit that produces the final prediction. The model is implemented using the FLAX NNX framework, which is part of the JAX ecosystem, enabling efficient automatic differentiation and GPU acceleration. Training is performed using the Adam optimizer with a learning rate of 0.001 and a large batch size of 200,000. The network minimizes the mean squared error (MSE) between the predicted values and the ground truth, and is trained for 1000 epochs.
+
+The features are standardized before being fed into the model and 80\% of the data is used for training, while 20\% is reserved for validation. This ensures that the model generalizes well to unseen data. 
+
+
+\begin{table}[htbp]
+\centering
+\begin{tabular}{|l|c|c|}
+\hline
+\textbf{Score} & \textbf{Small model} & \textbf{Big model} \\
+\hline
+R\textsuperscript{2} & 0.9818 & 0.9910 \\
+MAE & 0.0425 & 0.0318 \\
+MSE & 0.0137 & 0.0068 \\
+RMSE & 0.1170 & 0.0825 \\
+Max error & 1.8672 & 1.6806 \\
+\hline
+\end{tabular}
+\vspace{0.5em}  % Adjust as needed
+\caption{Comparison of model evaluation metrics between models.}
+\label{tab:model_metrics}
+\end{table}
