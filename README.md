@@ -32,4 +32,4 @@ geometric_functions.py
 
 The XGBoost model and FLAX MLP model are available in the Jupyter Notebooks inside the folder `models`.
 
-**Note:** The model isn't saved so a training of the models needs to be done using dataset 2.
+**Note:** The models themselves are not saved in this repository. To use them, you will need to train the models using **Dataset 2**.
