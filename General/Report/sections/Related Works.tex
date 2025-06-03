@@ -1,1 +1,18 @@
-<\section{Related Works}
+\section{Related Works}
+The task of assessing point cloud quality has received growing attention in recent years, particularly in the context of industrial automation and robotics. Traditional PCQA methods have largely focused on global metrics, such as average point density and MOS. However, these approaches fall short in applications that demand high local resolution, especially for automated defect detection, real-time scanning validation, and adaptive rescan decisions.
+
+Li and Zhang (2025) proposed one of the most comprehensive frameworks for robust point cloud quality assessment in robotic 3D scanning. Their method introduced local and global quality scoring, combining distribution uniformity and surface smoothness metrics. While effective, their approach still relied on geometric approximations and did not explicitly resolve the complexity-performance trade-off involved in high-resolution local surface analysis Li and Zhang, 2025.
+
+Earlier works such as Huang et al. (2020) and Luo et al. (2019) explored geometry-based metrics for 3D quality evaluation, using curvature and surface continuity as indicators. These methods showed that localized features could capture structural deformations more reliably than global measures, but they were computationally intensive and unsuitable for real-time applications.
+
+Deep learning approaches have also been increasingly applied to point cloud analysis. Qi et al.s PointNet architecture demonstrated how neural networks can learn spatial features directly from point sets. Later extensions such as PointNet++ and DGCNN enabled learning from local geometric structures, which is highly relevant for PCQA. However, these models typically address classification or segmentation tasks rather than quality estimation.
+
+What distinguishes the method proposed in this report is its specific focus on surface density as the target metric and its hybrid feature approach, combining:
+
+Efficiently computable local volume densities (adaptive-radius based),
+
+Geometry-sensitive descriptors (e.g., curvature, linearity, planarity),
+
+Gradient-based metrics for capturing surface variance.
+
+By identifying and learning the geometry bias that distorts volume-based estimations, this methodology bridges the gap between computational tractability and fidelity, offering a novel pathway toward scalable, real-time PCQA in robotic systems.
