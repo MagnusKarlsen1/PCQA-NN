@@ -4,7 +4,32 @@ The features can be devided into two groups, volume density and geometry bias. V
 
 \subsection*{Volume Density Features}
 Local volume density can be estimated using either a fixed-radius approach, which counts the number of neighbors within a constant radius for all points, or a fixed-number-of-neighbors approach, which measures the radius required to enclose a fixed number of neighbors around each point. The fixed-radius approach allows the volume density feature to capture information about holes and gaps in the poincloud. In contrast, the fixed-number-of-neighbors approach may obscure such features, as the nearest-neighbor algorithms tend to sample around or beyond holes, reducing their impact on the density estimate (see Figure~\ref{fig:radVSnbh_VD}). 
-To ensnure high sensitivity to holes, the fixed-radius approach is preferred. However, a fixed radius is unsuitable across varying point clouds, as it can yield inconsistent neighborhood sizes. Instead, an adaptive radius is defined as the average radius from the fixed-number-of-neighbors approach, based on 20 neighbors. The average radius is used and included as an explicit input feature. This enables the network to interpret local volume density consistently across different scales and sampling resolutions.
+To ensure high sensitivity to holes, the fixed-radius approach is preferred. However, a fixed radius is unsuitable across varying point clouds, as it can yield inconsistent neighborhood sizes. 
+
+Instead, an adaptive radius is defined as the average radius from the fixed-number-of-neighbors approach, based on 20 neighbors as shown in Algorithm \ref{alg:volume_density}. 
+\begin{algorithm}[H]
+\caption{Compute Volume Density Features}
+\label{alg:volume_density}
+\begin{algorithmic}[1]
+\STATE \textbf{Input:} Point cloud $P$
+\STATE Initialize list of radii $R \leftarrow []$
+\FOR{each point $p \in P$}
+  \STATE Find 20 nearest neighbors of $p$
+  \STATE Compute radius $r_p$ containing these 20 neighbors
+  \STATE Append $r_p$ to $R$
+\ENDFOR
+\STATE Compute average radius $\bar{r} \leftarrow \text{mean}(R)$
+\FOR{each point $p \in P$}
+  \STATE Count the number of neighbors within $\bar{r}$ (Euclidean ball)
+  \STATE Save this count as $n_p$
+\ENDFOR
+\STATE \textbf{Output:} Average radius $\bar{r}$ and list $\{n_p\}$ of points inside Euclidean ball.
+\end{algorithmic}
+\end{algorithm}
+
+
+
+The average radius is used and included as an explicit input feature. This enables the network to interpret local volume density consistently across different scales and sampling resolutions.
 The volume density then consists of two features:
 \begin{itemize}
     \item \textbf{Average radius}, equal for all points in a single pointcloud 
@@ -80,9 +105,12 @@ The features used for training the final model was.
     \item Planarity
     \item Gradient Difference
 \end{itemize}
+\vspace{5pt}
 
-\begin{figure}[H]
+The feature correlation matrix, shown in Figure \ref{fig:feature_correlation}, provides insight into the linear relationships between the input features used for training. In general, moderate correlations indicate that each feature captures distinct aspects of local geometry, supporting the robustness of the final feature set. A notable observation is the very strong negative correlation (-0.96) between linearity and planarity, suggesting these two features capture highly similar structural information in different ways. However, both are included in the feature set because they emphasize different aspects of local structure—linearity highlights edge-like features, while planarity captures flatness. Including both ensures that the model has access to these complementary geometric cues, even if their numerical values are strongly linked.
+\begin{figure}[htbp]
     \centering
-    \includegraphics[width=0.5\textwidth]{figures/correlation_matrix_final_lowQ.png}
-    \caption{Correlation matrix between features}\label{fig:feature_correlation}
+    \includegraphics[width=0.4\textwidth]{figures/correlation_matrix_final_lowQ.png}
+    \caption{Correlation matrix between features}
+    \label{fig:feature_correlation}
 \end{figure}
