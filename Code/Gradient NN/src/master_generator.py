@@ -29,7 +29,7 @@ import meshlab_functions as mf
 import solidworks_functions as sf
 import geometric_functions as gf
 
-import Datageneratory as Generator
+import Datagenerator as Generator
 
 shape_configs = {
     "ball" : [{"radius": 5},
@@ -112,8 +112,8 @@ def run_batch(neighborhood_size=20, holes=False):
 
     header = ["edge_mean", "plane_mean", "curvature", "linearity", "planarity", "omnivaraiance", "eigensum", "Average_radius", "pointsInside", "grad_dist"]
     BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-    feature_PATH = os.path.abspath(os.path.join(BASE_DIR, f"../Data/Training_data/holes_features_many_mesh.txt"))
-    label_PATH = os.path.abspath(os.path.join(BASE_DIR, f"../Data/Training_data/holes_labels_many_mesh.txt"))
+    feature_PATH = os.path.abspath(os.path.join(BASE_DIR, f"../Data/Training_data/Features.txt"))
+    label_PATH = os.path.abspath(os.path.join(BASE_DIR, f"../Data/Training_data/Labels.txt"))
     np.savetxt(feature_PATH, features_total_np, delimiter=" ", fmt="%.6f", header=" ".join(header))
     np.savetxt(label_PATH, labels_total_np, delimiter=" ", fmt="%.6f", header=" ".join(header_label))
         

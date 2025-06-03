@@ -172,7 +172,7 @@ def main(neighborhood_size, params, shape = "angle_curve", mesh_size = 0.5, nois
 
 if __name__ == "__main__":
     
-    params_ball = {"radius": 50}
+    params_ball = {"radius": 10}
 
     params = {"angle": 150,
               "thicknes": 20,
@@ -184,8 +184,8 @@ if __name__ == "__main__":
     header_label =["Label"]
     header = ["edge_mean", "plane_mean", "curvature", "linearity", "planarity", "omnivaraiance", "eigensum", "grad_dist", "radius"]
     BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-    feature_PATH = os.path.abspath(os.path.join(BASE_DIR, f"../Data/Training_data/holetest_feat.txt"))
-    label_PATH = os.path.abspath(os.path.join(BASE_DIR, f"../Data/Training_data/holetest_label.txt"))
+    feature_PATH = os.path.abspath(os.path.join(BASE_DIR, f"../Data/Training_data/Feature_single.txt"))
+    label_PATH = os.path.abspath(os.path.join(BASE_DIR, f"../Data/Training_data/Labels_single.txt"))
     np.savetxt(feature_PATH, features, delimiter=" ", fmt="%.6f", header=" ".join(header))
     np.savetxt(label_PATH, labels, delimiter=" ", fmt="%.6f", header=" ".join(header_label))
 
