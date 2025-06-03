@@ -10,7 +10,7 @@ Prior to being fed into the model, all features are standardized to improve conv
 \centering
 \begin{tabular}{|l|c|c|}
 \hline
-\textbf{Score} & \textbf{Small model} & \textbf{Big model} \\
+\textbf{Score} & \textbf{Dataset 1} & \textbf{Dataset 2} \\
 \hline
 R\textsuperscript{2} & 0.9818 & 0.9910 \\
 MAE & 0.0425 & 0.0318 \\
@@ -20,6 +20,20 @@ Max error & 1.8672 & 1.6806 \\
 \hline
 \end{tabular}
 \vspace{0.5em}  % Adjust as needed
-\caption{Comparison of model evaluation metrics between models.}
+\caption{Comparison of model evaluation metrics between models trained on different datasets.}
 \label{tab:model_metrics}
 \end{table}
+
+It is of interest to examine whether the model's predictions of surface density rely too heavily on a small subset of features. This is evaluated by analyzing which features are most influential and their relative importance in determining accurate predictions.
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.5\textwidth]{figures/feature_importance_lowQ.png}
+\caption{Visualization of the features used for training and their relative importance in the final model.}
+\label{fig:feature_importance}
+\end{figure}
+
+A good distribution of importance between features show that the model use all features and not relying too much on a small number of features, see figure(\ref{fig:feature_importance})
+
+While there is not a big difference in standard evaluation metrics between models trained on the two different datasets, there is a big difference the predictions of the models, especially in the lower end of mesh sizes. Therefore we need more evaluation criteria than the standard evaluation metrics.
+
